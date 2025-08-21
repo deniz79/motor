@@ -17,7 +17,6 @@ import androidx.navigation.compose.rememberNavController
 import com.motorlar.app.ui.navigation.MotorlarNavGraph
 import com.motorlar.app.ui.theme.MotorlarTheme
 import com.motorlar.app.viewmodel.MainViewModel
-import com.motorlar.app.data.local.AppDatabase
 
 class MainActivity : ComponentActivity() {
     
@@ -41,9 +40,6 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Veritabanını başlat
-        val database = AppDatabase.getDatabase(this)
         
         viewModel = MainViewModel()
         checkAndRequestPermissions()

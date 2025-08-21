@@ -17,8 +17,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.motorlar.app.data.model.LoginRequest
-import com.motorlar.app.data.model.RegisterRequest
+// import com.motorlar.app.data.model.LoginRequest
+// import com.motorlar.app.data.model.RegisterRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,7 +154,7 @@ fun AuthScreen(
                 onClick = {
                     // Kayıt işlemi
                     if (password == confirmPassword) {
-                        val request = RegisterRequest(username, email, password, fullName)
+                        // val request = RegisterRequest(username, email, password, fullName)
                         // TODO: Kayıt işlemi
                         onLoginSuccess()
                     }
@@ -214,7 +214,7 @@ fun AuthScreen(
             Button(
                 onClick = {
                     // Giriş işlemi
-                    val request = LoginRequest(email, password)
+                    // val request = LoginRequest(email, password)
                     // TODO: Giriş işlemi
                     onLoginSuccess()
                 },

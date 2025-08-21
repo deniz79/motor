@@ -40,6 +40,18 @@ android {
         compose true
     }
     
+    // Disable annotation processing
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-proc:none"
+    }
+    
+    // Disable kapt
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            freeCompilerArgs += ["-Xskip-prerelease-check"]
+        }
+    }
+    
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.3'
     }

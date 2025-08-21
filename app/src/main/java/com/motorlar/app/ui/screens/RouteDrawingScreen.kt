@@ -53,10 +53,10 @@ fun RouteDrawingScreen(
                                 isDrawingRoute = false
                                 // Rotayı kaydet ve harita ekranına ekle
                                 val newRoute = Route(
-                                    id = System.currentTimeMillis().toInt(),
+                                    id = System.currentTimeMillis(),
                                     name = routeName,
                                     description = routeDescription,
-                                    creatorId = 1,
+                                    creatorId = 1L,
                                     creatorName = "Siz",
                                     motorcycleType = com.motorlar.app.data.model.MotorcycleType.SPORT,
                                     startLocation = "Başlangıç",

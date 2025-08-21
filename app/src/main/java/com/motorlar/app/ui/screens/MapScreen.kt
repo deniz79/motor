@@ -1,6 +1,8 @@
 package com.motorlar.app.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -15,7 +17,11 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import com.motorlar.app.viewmodel.MainViewModel
+import com.motorlar.app.data.model.Route
+import com.motorlar.app.data.model.MotorcycleType
+import com.motorlar.app.data.model.RouteDifficulty
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,6 +31,10 @@ fun MapScreen(
 ) {
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var isMapReady by remember { mutableStateOf(false) }
+    var currentLocation by remember { mutableStateOf(LatLng(41.0082, 28.9784)) } // İstanbul
+    var isDrawingRoute by remember { mutableStateOf(false) }
+    var routePoints by remember { mutableStateOf<List<LatLng>>(emptyList()) }
+    var currentRoute by remember { mutableStateOf<Route?>(null) }
     
     // Dialog states
     var showLocationSettingsDialog by remember { mutableStateOf(false) }
@@ -35,9 +45,50 @@ fun MapScreen(
     var showTrafficDialog by remember { mutableStateOf(false) }
     var showRouteDrawingDialog by remember { mutableStateOf(false) }
     var showNearbyRoutesDialog by remember { mutableStateOf(false) }
+    var showRouteSaveDialog by remember { mutableStateOf(false) }
+    var showDirectionsDialog by remember { mutableStateOf<Route?>(null) }
     
-    // İstanbul koordinatları (varsayılan)
-    val istanbul = LatLng(41.0082, 28.9784)
+    // Kullanıcı rotaları (örnek veri)
+    val userRoutes = remember {
+        listOf(
+            Route(
+                name = "İstanbul - Sapanca Gölü",
+                description = "Güzel manzaralı rota",
+                creatorId = 1,
+                creatorName = "Ahmet",
+                motorcycleType = MotorcycleType.Sport,
+                startLocation = "İstanbul",
+                endLocation = "Sapanca",
+                distance = 120.0,
+                duration = 7200000L, // 2 saat
+                difficulty = RouteDifficulty.Medium
+            ),
+            Route(
+                name = "İstanbul - Bursa",
+                description = "Tarihi rota",
+                creatorId = 2,
+                creatorName = "Mehmet",
+                motorcycleType = MotorcycleType.Touring,
+                startLocation = "İstanbul",
+                endLocation = "Bursa",
+                distance = 150.0,
+                duration = 9000000L, // 2.5 saat
+                difficulty = RouteDifficulty.Easy
+            ),
+            Route(
+                name = "İstanbul - İzmit",
+                description = "Sahil rotası",
+                creatorId = 3,
+                creatorName = "Ayşe",
+                motorcycleType = MotorcycleType.Cruiser,
+                startLocation = "İstanbul",
+                endLocation = "İzmit",
+                distance = 80.0,
+                duration = 5400000L, // 1.5 saat
+                difficulty = RouteDifficulty.Easy
+            )
+        )
+    }
     
     Column(
         modifier = modifier.fillMaxSize()
@@ -82,22 +133,59 @@ fun MapScreen(
                         }
                         
                         // Varsayılan konuma git
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(istanbul, 10f))
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 10f))
                         
-                        // Örnek rotalar ekle
-                        val sampleRoutes = listOf(
-                            LatLng(41.0082, 28.9784) to "İstanbul",
-                            LatLng(40.9862, 29.1244) to "Sapanca Gölü",
-                            LatLng(40.7392, 29.6111) to "İzmit"
-                        )
-                        
-                        sampleRoutes.forEach { (latLng, title) ->
+                        // Kullanıcı rotalarını haritaya ekle
+                        userRoutes.forEach { route ->
+                            val startLatLng = when (route.startLocation) {
+                                "İstanbul" -> LatLng(41.0082, 28.9784)
+                                "Sapanca" -> LatLng(40.9862, 29.1244)
+                                "Bursa" -> LatLng(40.1885, 29.0610)
+                                "İzmit" -> LatLng(40.7392, 29.6111)
+                                else -> LatLng(41.0082, 28.9784)
+                            }
+                            
+                            val endLatLng = when (route.endLocation) {
+                                "Sapanca" -> LatLng(40.9862, 29.1244)
+                                "Bursa" -> LatLng(40.1885, 29.0610)
+                                "İzmit" -> LatLng(40.7392, 29.6111)
+                                else -> LatLng(41.0082, 28.9784)
+                            }
+                            
+                            // Başlangıç marker'ı
                             googleMap.addMarker(
                                 MarkerOptions()
-                                    .position(latLng)
-                                    .title(title)
-                                    .snippet("Motor rotası")
+                                    .position(startLatLng)
+                                    .title(route.name)
+                                    .snippet("Başlangıç: ${route.startLocation}")
                             )
+                            
+                            // Bitiş marker'ı
+                            googleMap.addMarker(
+                                MarkerOptions()
+                                    .position(endLatLng)
+                                    .title(route.name)
+                                    .snippet("Bitiş: ${route.endLocation}")
+                            )
+                            
+                            // Rota çizgisi
+                            googleMap.addPolyline(
+                                PolylineOptions()
+                                    .add(startLatLng, endLatLng)
+                                    .width(8f)
+                                    .color(0xFF2196F3.toInt())
+                            )
+                        }
+                        
+                        // Harita tıklama olayı
+                        googleMap.setOnMapClickListener { latLng ->
+                            if (isDrawingRoute) {
+                                routePoints = routePoints + latLng
+                                currentRoute = currentRoute?.copy(
+                                    distance = calculateDistance(routePoints),
+                                    duration = calculateDuration(routePoints)
+                                )
+                            }
                         }
                         
                         isMapReady = true
@@ -115,10 +203,23 @@ fun MapScreen(
                 ) {
                     // Rota çizme butonu
                     FloatingActionButton(
-                        onClick = { showRouteDrawingDialog = true },
-                        modifier = Modifier.size(56.dp)
+                        onClick = { 
+                            if (isDrawingRoute) {
+                                // Çizimi bitir
+                                isDrawingRoute = false
+                                showRouteSaveDialog = true
+                            } else {
+                                // Çizimi başlat
+                                showRouteDrawingDialog = true
+                            }
+                        },
+                        modifier = Modifier.size(56.dp),
+                        containerColor = if (isDrawingRoute) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                     ) {
-                        Icon(Icons.Default.Timeline, "Rota Çiz")
+                        Icon(
+                            if (isDrawingRoute) Icons.Default.Stop else Icons.Default.Timeline,
+                            if (isDrawingRoute) "Çizimi Bitir" else "Rota Çiz"
+                        )
                     }
                     
                     // Yakın rotalar butonu
@@ -133,7 +234,7 @@ fun MapScreen(
                     FloatingActionButton(
                         onClick = { 
                             mapView?.getMapAsync { map ->
-                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(istanbul, 15f))
+                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
                             }
                         },
                         modifier = Modifier.size(56.dp)
@@ -204,29 +305,16 @@ fun MapScreen(
             title = { Text("Konum Ayarları") },
             text = {
                 Column {
-                    TextButton(
-                        onClick = { /* Konum izni ver */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Konum İzni Ver")
-                    }
-                    TextButton(
-                        onClick = { /* Konum ayarlarını aç */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Konum Ayarlarını Aç")
-                    }
-                    TextButton(
-                        onClick = { /* GPS ayarları */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("GPS Ayarları")
-                    }
+                    Text("Konum servisleri aktif")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("GPS: Açık")
+                    Text("Ağ konumu: Açık")
+                    Text("Doğruluk: Yüksek")
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showLocationSettingsDialog = false }) {
-                    Text("Kapat")
+                    Text("Tamam")
                 }
             }
         )
@@ -246,16 +334,16 @@ fun MapScreen(
                         Text("Uydu Görünümü")
                     }
                     TextButton(
-                        onClick = { /* Terrain görünümü */ },
+                        onClick = { /* Arazi görünümü */ },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Arazi Görünümü")
                     }
                     TextButton(
-                        onClick = { /* Normal görünüm */ },
+                        onClick = { /* Trafik görünümü */ },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Normal Görünüm")
+                        Text("Trafik Görünümü")
                     }
                 }
             },
@@ -271,32 +359,33 @@ fun MapScreen(
     if (showFiltersDialog) {
         AlertDialog(
             onDismissRequest = { showFiltersDialog = false },
-            title = { Text("Harita Filtreleri") },
+            title = { Text("Filtreler") },
             text = {
                 Column {
-                    TextButton(
-                        onClick = { /* Motor tipi filtresi */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Motor Tipi")
+                    Text("Motor Tipi:")
+                    MotorcycleType.values().forEach { type ->
+                        TextButton(
+                            onClick = { /* Filtre uygula */ },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(type.name)
+                        }
                     }
-                    TextButton(
-                        onClick = { /* Zorluk filtresi */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Zorluk Seviyesi")
-                    }
-                    TextButton(
-                        onClick = { /* Mesafe filtresi */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Mesafe")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Zorluk:")
+                    RouteDifficulty.values().forEach { difficulty ->
+                        TextButton(
+                            onClick = { /* Filtre uygula */ },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(difficulty.name)
+                        }
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showFiltersDialog = false }) {
-                    Text("Kapat")
+                    Text("Uygula")
                 }
             }
         )
@@ -314,16 +403,12 @@ fun MapScreen(
                 Column {
                     OutlinedTextField(
                         value = searchQuery,
-                        onValueChange = { 
+                        onValueChange = {
                             searchQuery = it
-                            // Arama sonuçlarını simüle et
                             if (it.isNotBlank()) {
                                 searchResults = listOf(
-                                    "İstanbul - Bursa",
-                                    "İstanbul - Ankara",
-                                    "İstanbul - İzmir",
-                                    "Bursa - İzmir",
-                                    "Ankara - İzmir"
+                                    "İstanbul - Bursa", "İstanbul - Ankara", "İstanbul - İzmir",
+                                    "Bursa - İzmir", "Ankara - İzmir", "Sapanca - İstanbul"
                                 ).filter { location -> location.contains(it, ignoreCase = true) }
                             } else {
                                 searchResults = emptyList()
@@ -333,18 +418,20 @@ fun MapScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
-                    
                     Spacer(modifier = Modifier.height(8.dp))
-                    
                     if (searchResults.isNotEmpty()) {
                         Text("Öneriler:", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(4.dp))
                         searchResults.forEach { result ->
                             TextButton(
-                                onClick = {
-                                    // Rota çizme işlemi
+                                onClick = { 
                                     searchQuery = result
                                     showRouteSearchDialog = false
+                                    // Yol tarifi göster
+                                    val route = userRoutes.find { it.name.contains(result) }
+                                    if (route != null) {
+                                        showDirectionsDialog = route
+                                    }
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -356,14 +443,14 @@ fun MapScreen(
             },
             confirmButton = {
                 TextButton(
-                    onClick = {
+                    onClick = { 
                         if (searchQuery.isNotBlank()) {
-                            // Rota çizme işlemi
                             showRouteSearchDialog = false
+                            // Yol tarifi göster
                         }
                     }
                 ) {
-                    Text("Rota Çiz")
+                    Text("Yol Tarifi Al")
                 }
             },
             dismissButton = {
@@ -380,12 +467,55 @@ fun MapScreen(
             onDismissRequest = { showSavedRoutesDialog = false },
             title = { Text("Kayıtlı Rotalar") },
             text = {
-                Column {
-                    Text("İstanbul - Sapanca Gölü")
-                    Text("Bolu - Abant Gölü")
-                    Text("İzmir - Çeşme Sahil")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Toplam: 3 kayıtlı rota")
+                LazyColumn {
+                    items(userRoutes) { route ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = route.name,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = route.description,
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("${route.distance} km")
+                                    Text("${route.motorcycleType.name}")
+                                    Text("${route.difficulty.name}")
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    OutlinedButton(
+                                        onClick = { 
+                                            showSavedRoutesDialog = false
+                                            showDirectionsDialog = route
+                                        }
+                                    ) {
+                                        Text("Git")
+                                    }
+                                    OutlinedButton(
+                                        onClick = { /* Paylaş */ }
+                                    ) {
+                                        Text("Paylaş")
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
@@ -403,94 +533,17 @@ fun MapScreen(
             title = { Text("Trafik Durumu") },
             text = {
                 Column {
-                    Text("Mevcut konum: Yoğun trafik")
-                    Text("İstanbul merkez: Orta yoğunluk")
-                    Text("Sapanca yolu: Açık")
+                    Text("İstanbul: Yoğun")
+                    Text("Bursa: Normal")
+                    Text("İzmit: Hafif")
+                    Text("Sapanca: Normal")
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Son güncelleme: 5 dk önce")
+                    Text("Genel durum: Orta yoğunlukta")
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showTrafficDialog = false }) {
                     Text("Tamam")
-                }
-            }
-        )
-    }
-    
-    // Rota çizme dialog
-    if (showRouteDrawingDialog) {
-        var routeName by remember { mutableStateOf("") }
-        var routeDescription by remember { mutableStateOf("") }
-        var isDrawingRoute by remember { mutableStateOf(false) }
-        var routePoints by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
-        
-        AlertDialog(
-            onDismissRequest = { showRouteDrawingDialog = false },
-            title = { Text("Rota Çizme") },
-            text = {
-                Column {
-                    if (!isDrawingRoute) {
-                        OutlinedTextField(
-                            value = routeName,
-                            onValueChange = { routeName = it },
-                            label = { Text("Rota Adı") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        OutlinedTextField(
-                            value = routeDescription,
-                            onValueChange = { routeDescription = it },
-                            label = { Text("Açıklama") },
-                            modifier = Modifier.fillMaxWidth(),
-                            minLines = 2
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        Text("Haritada tıklayarak rota çizebilirsiniz:")
-                        Text("• Başlangıç noktasına tıklayın")
-                        Text("• Ara noktalara tıklayın")
-                        Text("• Bitiş noktasına çift tıklayın")
-                    } else {
-                        Text("Rota çiziliyor...")
-                        Text("Tıklayın: ${routePoints.size} nokta")
-                        if (routePoints.isNotEmpty()) {
-                            Text("Son nokta: ${routePoints.last().first}, ${routePoints.last().second}")
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                if (!isDrawingRoute) {
-                    TextButton(
-                        onClick = { 
-                            if (routeName.isNotBlank()) {
-                                isDrawingRoute = true
-                                routePoints = listOf(Pair(41.0082, 28.9784)) // İstanbul başlangıç
-                            }
-                        },
-                        enabled = routeName.isNotBlank()
-                    ) {
-                        Text("Çizmeye Başla")
-                    }
-                } else {
-                    TextButton(
-                        onClick = { 
-                            // Rota kaydetme işlemi
-                            showRouteDrawingDialog = false
-                            // TODO: Rotayı kaydet ve paylaş
-                        }
-                    ) {
-                        Text("Rotayı Kaydet")
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showRouteDrawingDialog = false }) {
-                    Text("İptal")
                 }
             }
         )
@@ -502,25 +555,250 @@ fun MapScreen(
             onDismissRequest = { showNearbyRoutesDialog = false },
             title = { Text("Yakın Rotalar") },
             text = {
-                Column {
-                    Text("5 km içinde:")
-                    Text("• İstanbul - Sapanca (2.3 km)")
-                    Text("• Bolu - Abant (4.1 km)")
-                    Text("• İzmir - Çeşme (4.8 km)")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Toplam: 3 rota bulundu")
+                LazyColumn {
+                    items(userRoutes.take(3)) { route ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = route.name,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "${route.distance} km uzaklıkta",
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedButton(
+                                    onClick = { 
+                                        showNearbyRoutesDialog = false
+                                        showDirectionsDialog = route
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Git")
+                                }
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showNearbyRoutesDialog = false }) {
-                    Text("Göster")
+                    Text("Kapat")
+                }
+            }
+        )
+    }
+    
+    // Rota çizme başlatma dialog
+    if (showRouteDrawingDialog) {
+        var routeName by remember { mutableStateOf("") }
+        var routeDescription by remember { mutableStateOf("") }
+        
+        AlertDialog(
+            onDismissRequest = { showRouteDrawingDialog = false },
+            title = { Text("Rota Çizme") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = routeName,
+                        onValueChange = { routeName = it },
+                        label = { Text("Rota Adı") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = routeDescription,
+                        onValueChange = { routeDescription = it },
+                        label = { Text("Açıklama") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Haritada tıklayarak rota çizebilirsiniz:")
+                    Text("• Başlangıç noktasına tıklayın")
+                    Text("• Ara noktalara tıklayın")
+                    Text("• Bitiş noktasına tıklayın")
+                    Text("• Çizimi bitirmek için butona tekrar basın")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (routeName.isNotBlank()) {
+                            currentRoute = Route(
+                                name = routeName,
+                                description = routeDescription,
+                                creatorId = 1,
+                                creatorName = viewModel.uiState.collectAsState().value.currentUser ?: "Kullanıcı",
+                                motorcycleType = MotorcycleType.Sport,
+                                startLocation = "Başlangıç",
+                                endLocation = "Bitiş",
+                                distance = 0.0,
+                                duration = 0L,
+                                difficulty = RouteDifficulty.Easy
+                            )
+                            routePoints = emptyList()
+                            isDrawingRoute = true
+                            showRouteDrawingDialog = false
+                        }
+                    },
+                    enabled = routeName.isNotBlank()
+                ) {
+                    Text("Çizmeye Başla")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showNearbyRoutesDialog = false }) {
+                TextButton(onClick = { showRouteDrawingDialog = false }) {
                     Text("İptal")
                 }
             }
         )
     }
+    
+    // Rota kaydetme dialog
+    if (showRouteSaveDialog) {
+        var selectedMotorcycleType by remember { mutableStateOf<MotorcycleType?>(null) }
+        var selectedDifficulty by remember { mutableStateOf<RouteDifficulty?>(null) }
+        
+        AlertDialog(
+            onDismissRequest = { showRouteSaveDialog = false },
+            title = { Text("Rotayı Kaydet") },
+            text = {
+                Column {
+                    Text("Rota adı: ${currentRoute?.name}")
+                    Text("Mesafe: ${currentRoute?.distance?.let { "%.1f km".format(it) }}")
+                    Text("Süre: ${currentRoute?.duration?.let { "${it / 60000} dakika" }}")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Motor Tipi:")
+                    MotorcycleType.values().forEach { type ->
+                        Row {
+                            RadioButton(
+                                selected = selectedMotorcycleType == type,
+                                onClick = { selectedMotorcycleType = type }
+                            )
+                            Text(type.name)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Zorluk:")
+                    RouteDifficulty.values().forEach { difficulty ->
+                        Row {
+                            RadioButton(
+                                selected = selectedDifficulty == difficulty,
+                                onClick = { selectedDifficulty = difficulty }
+                            )
+                            Text(difficulty.name)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (selectedMotorcycleType != null && selectedDifficulty != null) {
+                            // Rotayı kaydet ve ana sayfaya ekle
+                            showRouteSaveDialog = false
+                            isDrawingRoute = false
+                            routePoints = emptyList()
+                            currentRoute = null
+                        }
+                    },
+                    enabled = selectedMotorcycleType != null && selectedDifficulty != null
+                ) {
+                    Text("Kaydet")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRouteSaveDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Yol tarifi dialog
+    showDirectionsDialog?.let { route ->
+        AlertDialog(
+            onDismissRequest = { showDirectionsDialog = null },
+            title = { Text("Yol Tarifi: ${route.name}") },
+            text = {
+                Column {
+                    Text("Başlangıç: ${route.startLocation}")
+                    Text("Bitiş: ${route.endLocation}")
+                    Text("Mesafe: ${route.distance} km")
+                    Text("Tahmini süre: ${route.duration / 60000} dakika")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Yol tarifi:")
+                    Text("1. ${route.startLocation} merkezinden çıkın")
+                    Text("2. D100 karayoluna girin")
+                    Text("3. ${route.endLocation} yönünde devam edin")
+                    Text("4. ${route.endLocation} merkezine ulaşın")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDirectionsDialog = null
+                        // Haritada rotayı göster
+                        mapView?.getMapAsync { map ->
+                            val startLatLng = when (route.startLocation) {
+                                "İstanbul" -> LatLng(41.0082, 28.9784)
+                                "Sapanca" -> LatLng(40.9862, 29.1244)
+                                "Bursa" -> LatLng(40.1885, 29.0610)
+                                "İzmit" -> LatLng(40.7392, 29.6111)
+                                else -> LatLng(41.0082, 28.9784)
+                            }
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 12f))
+                        }
+                    }
+                ) {
+                    Text("Haritada Göster")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDirectionsDialog = null }) {
+                    Text("Kapat")
+                }
+            }
+        )
+    }
+}
+
+// Yardımcı fonksiyonlar
+private fun calculateDistance(points: List<LatLng>): Double {
+    if (points.size < 2) return 0.0
+    var totalDistance = 0.0
+    for (i in 0 until points.size - 1) {
+        totalDistance += calculateDistanceBetweenPoints(points[i], points[i + 1])
+    }
+    return totalDistance
+}
+
+private fun calculateDistanceBetweenPoints(point1: LatLng, point2: LatLng): Double {
+    val R = 6371.0 // Dünya'nın yarıçapı (km)
+    val lat1 = Math.toRadians(point1.latitude)
+    val lat2 = Math.toRadians(point2.latitude)
+    val deltaLat = Math.toRadians(point2.latitude - point1.latitude)
+    val deltaLng = Math.toRadians(point2.longitude - point1.longitude)
+    
+    val a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2)
+    val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    
+    return R * c
+}
+
+private fun calculateDuration(points: List<LatLng>): Long {
+    val distance = calculateDistance(points)
+    val averageSpeed = 60.0 // km/h
+    return ((distance / averageSpeed) * 3600000).toLong() // milisaniye
 }

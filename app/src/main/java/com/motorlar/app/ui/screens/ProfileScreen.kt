@@ -124,23 +124,78 @@ fun ProfileScreen(
     
     // Kişisel bilgiler dialog
     if (showPersonalInfoDialog) {
+        var name by remember { mutableStateOf(userInfo.name) }
+        var email by remember { mutableStateOf(userInfo.email) }
+        var phone by remember { mutableStateOf("+90 555 123 4567") }
+        var birthDate by remember { mutableStateOf("15 Mart 1990") }
+        var city by remember { mutableStateOf("İstanbul") }
+        var experienceLevel by remember { mutableStateOf(userInfo.experienceLevel) }
+        
         AlertDialog(
             onDismissRequest = { showPersonalInfoDialog = false },
             title = { Text("Kişisel Bilgiler") },
             text = {
                 Column {
-                    Text("Ad Soyad: ${userInfo.name}")
-                    Text("E-posta: ${userInfo.email}")
-                    Text("Telefon: +90 555 123 4567")
-                    Text("Doğum Tarihi: 15 Mart 1990")
-                    Text("Şehir: İstanbul")
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Ad Soyad") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Bu bilgileri düzenlemek için profil düzenle butonunu kullanın.")
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("E-posta") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = phone,
+                        onValueChange = { phone = it },
+                        label = { Text("Telefon") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = birthDate,
+                        onValueChange = { birthDate = it },
+                        label = { Text("Doğum Tarihi") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = city,
+                        onValueChange = { city = it },
+                        label = { Text("Şehir") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Deneyim Seviyesi:")
+                    listOf("Başlangıç", "Orta", "İleri", "Uzman").forEach { level ->
+                        Row {
+                            RadioButton(
+                                selected = experienceLevel == level,
+                                onClick = { experienceLevel = level }
+                            )
+                            Text(level)
+                        }
+                    }
                 }
             },
             confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Bilgileri güncelle
+                        showPersonalInfoDialog = false
+                    }
+                ) {
+                    Text("Kaydet")
+                }
+            },
+            dismissButton = {
                 TextButton(onClick = { showPersonalInfoDialog = false }) {
-                    Text("Tamam")
+                    Text("İptal")
                 }
             }
         )
@@ -148,24 +203,78 @@ fun ProfileScreen(
     
     // Motor bilgileri dialog
     if (showMotorcycleInfoDialog) {
+        var motorcycleType by remember { mutableStateOf(userInfo.motorcycleType) }
+        var brand by remember { mutableStateOf("Honda") }
+        var model by remember { mutableStateOf("CBR600RR") }
+        var year by remember { mutableStateOf("2020") }
+        var engineSize by remember { mutableStateOf("600cc") }
+        var color by remember { mutableStateOf("Kırmızı") }
+        
         AlertDialog(
             onDismissRequest = { showMotorcycleInfoDialog = false },
             title = { Text("Motor Bilgileri") },
             text = {
                 Column {
-                    Text("Motor Tipi: ${userInfo.motorcycleType}")
-                    Text("Marka: Honda")
-                    Text("Model: CBR600RR")
-                    Text("Yıl: 2020")
-                    Text("Motor Hacmi: 600cc")
-                    Text("Renk: Kırmızı")
+                    Text("Motor Tipi:")
+                    listOf("Sport", "Touring", "Cruiser", "Adventure", "Naked").forEach { type ->
+                        Row {
+                            RadioButton(
+                                selected = motorcycleType == type,
+                                onClick = { motorcycleType = type }
+                            )
+                            Text(type)
+                        }
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Deneyim Seviyesi: ${userInfo.experienceLevel}")
+                    OutlinedTextField(
+                        value = brand,
+                        onValueChange = { brand = it },
+                        label = { Text("Marka") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = model,
+                        onValueChange = { model = it },
+                        label = { Text("Model") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = year,
+                        onValueChange = { year = it },
+                        label = { Text("Yıl") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = engineSize,
+                        onValueChange = { engineSize = it },
+                        label = { Text("Motor Hacmi") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = color,
+                        onValueChange = { color = it },
+                        label = { Text("Renk") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             },
             confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Motor bilgilerini güncelle
+                        showMotorcycleInfoDialog = false
+                    }
+                ) {
+                    Text("Kaydet")
+                }
+            },
+            dismissButton = {
                 TextButton(onClick = { showMotorcycleInfoDialog = false }) {
-                    Text("Tamam")
+                    Text("İptal")
                 }
             }
         )

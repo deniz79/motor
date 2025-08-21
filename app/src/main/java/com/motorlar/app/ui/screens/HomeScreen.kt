@@ -473,11 +473,11 @@ fun HomeScreen(
     if (showDownloadDialog) {
         AlertDialog(
             onDismissRequest = { showDownloadDialog = false },
-            title = { Text("Rota İndir") },
+            title = { Text("Yol Tarifi Al") },
             text = {
                 Column {
                     selectedRouteForAction?.let { route ->
-                        Text("${route.name} rotasını indirmek istiyor musunuz?")
+                        Text("${route.name} rotasına gitmek istiyor musunuz?")
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("Mesafe: ${route.distance} km")
                         Text("Süre: ${route.duration} dk")
@@ -493,7 +493,7 @@ fun HomeScreen(
                         selectedRouteForAction = null
                     }
                 ) {
-                    Text("İndir")
+                    Text("Git")
                 }
             },
             dismissButton = {
@@ -702,9 +702,9 @@ fun RouteCard(
                     onClick = onDownload,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(Icons.Default.Download, "İndir")
+                    Icon(Icons.Default.Directions, "Git")
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("İndir")
+                    Text("Git")
                 }
                 
                 Spacer(modifier = Modifier.width(8.dp))

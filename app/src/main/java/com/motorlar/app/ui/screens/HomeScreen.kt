@@ -26,6 +26,9 @@ import com.motorlar.app.data.model.RouteDifficulty
 @Composable
 fun HomeScreen(
     viewModel: MainViewModel,
+    onNavigateToRouteDetail: (String) -> Unit = {},
+    onNavigateToPostCreate: () -> Unit = {},
+    onNavigateToRouteDrawing: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val currentUser = viewModel.uiState.collectAsState().value.currentUser
@@ -170,7 +173,7 @@ fun HomeScreen(
             // Reels/Post paylaş butonu
             item {
                 Button(
-                    onClick = { showCreatePostDialog = true },
+                    onClick = { onNavigateToPostCreate() },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary
@@ -238,11 +241,18 @@ fun HomeScreen(
                         else -> "Çeşme'de güneş batımı 🌅"
                     },
                     onLocationClick = { location ->
-                        // Haritada konumu göster
+                        // Haritada konumu göster - RouteDetail ekranına yönlendir
+                        onNavigateToRouteDetail("location_$index")
                     },
-                    onLikeClick = { /* Beğen */ },
-                    onCommentClick = { /* Yorum */ },
-                    onShareClick = { /* Paylaş */ }
+                    onLikeClick = { 
+                        // Beğeni işlemi
+                    },
+                    onCommentClick = { 
+                        // Yorum dialog'u aç
+                    },
+                    onShareClick = { 
+                        // Paylaş dialog'u aç
+                    }
                 )
             }
         }
@@ -317,7 +327,7 @@ fun HomeScreen(
                     Button(
                         onClick = {
                             showNewRouteDialog = false
-                            showRouteDrawingDialog = true
+                            onNavigateToRouteDrawing("Yeni Rota", "Haritada çizilen rota")
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -399,7 +409,7 @@ fun HomeScreen(
                     onClick = {
                         if (routeName.isNotBlank()) {
                             showRouteDrawingDialog = false
-                            // Harita ekranına yönlendir
+                            onNavigateToRouteDrawing(routeName, routeDescription)
                         }
                     },
                     enabled = routeName.isNotBlank()
@@ -516,8 +526,10 @@ fun HomeScreen(
                 TextButton(
                     onClick = {
                         showDownloadDialog = false
+                        selectedRouteForAction?.let { route ->
+                            onNavigateToRouteDetail(route.id.toString())
+                        }
                         selectedRouteForAction = null
-                        // Harita ekranına yönlendir ve rotayı göster
                     }
                 ) {
                     Text("Haritada Göster")
@@ -672,7 +684,7 @@ fun HomeScreen(
                 TextButton(
                     onClick = {
                         showRouteDetailDialog = null
-                        // Haritada rotayı göster
+                        onNavigateToRouteDetail(route.id.toString())
                     }
                 ) {
                     Text("Haritada Göster")

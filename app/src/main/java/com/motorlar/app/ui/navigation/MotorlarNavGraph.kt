@@ -87,7 +87,18 @@ fun MotorlarNavGraph(
                 )
             }
             composable(Screen.Home.route) {
-                HomeScreen(viewModel = viewModel)
+                HomeScreen(
+                    viewModel = viewModel,
+                    onNavigateToRouteDetail = { routeId ->
+                        navController.navigate(Screen.RouteDetail.route + "/$routeId")
+                    },
+                    onNavigateToPostCreate = {
+                        navController.navigate(Screen.PostCreate.route)
+                    },
+                    onNavigateToRouteDrawing = { routeName, routeDescription ->
+                        navController.navigate(Screen.RouteDrawing.route + "/$routeName/$routeDescription")
+                    }
+                )
             }
             composable(Screen.Map.route) {
                 MapScreen(viewModel = viewModel)
@@ -103,7 +114,24 @@ fun MotorlarNavGraph(
             }
             composable(Screen.RouteDetail.route + "/{routeId}") { backStackEntry ->
                 val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
-                RouteDetailScreen(routeId = routeId)
+                RouteDetailScreen(routeId = routeId, viewModel = viewModel)
+            }
+            composable(Screen.PostCreate.route) {
+                PostCreateScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.RouteDrawing.route + "/{routeName}/{routeDescription}") { backStackEntry ->
+                val routeName = backStackEntry.arguments?.getString("routeName") ?: ""
+                val routeDescription = backStackEntry.arguments?.getString("routeDescription") ?: ""
+                RouteDrawingScreen(
+                    routeName = routeName,
+                    routeDescription = routeDescription,
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onRouteSaved = { navController.popBackStack() }
+                )
             }
         }
     }

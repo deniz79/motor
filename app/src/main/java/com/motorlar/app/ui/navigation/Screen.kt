@@ -10,4 +10,6 @@ sealed class Screen(val route: String, val resourceId: Int) {
     object Team : Screen("team", R.string.team)
     object Profile : Screen("profile", R.string.profile)
     object RouteDetail : Screen("route_detail", R.string.route_detail)
+    object PostCreate : Screen("post_create", R.string.post_create)
+    object RouteDrawing : Screen("route_drawing", R.string.route_drawing)
 }

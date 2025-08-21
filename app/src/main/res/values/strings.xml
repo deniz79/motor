@@ -9,6 +9,8 @@
     <string name="team">Takım</string>
     <string name="profile">Profil</string>
     <string name="route_detail">Rota Detayı</string>
+    <string name="post_create">Paylaşım Oluştur</string>
+    <string name="route_drawing">Rota Çizme</string>
     <string name="nav_home">Ana Sayfa</string>
     <string name="nav_map">Harita</string>
     <string name="nav_record">Kayıt</string>

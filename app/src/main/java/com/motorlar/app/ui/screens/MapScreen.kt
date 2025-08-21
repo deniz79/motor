@@ -92,6 +92,36 @@ fun MapScreen(
         )
     }
     
+    // Kullanıcının geçmiş rotaları
+    val userHistoryRoutes = remember {
+        listOf(
+            Route(
+                name = "Dünkü Rota",
+                description = "İstanbul - Kartal",
+                creatorId = 1,
+                creatorName = currentUser ?: "Siz",
+                motorcycleType = MotorcycleType.SPORT,
+                startLocation = "İstanbul",
+                endLocation = "Kartal",
+                distance = 25.0,
+                duration = 1800000L, // 30 dakika
+                difficulty = RouteDifficulty.EASY
+            ),
+            Route(
+                name = "Geçen Hafta",
+                description = "İstanbul - Şile",
+                creatorId = 1,
+                creatorName = currentUser ?: "Siz",
+                motorcycleType = MotorcycleType.SPORT,
+                startLocation = "İstanbul",
+                endLocation = "Şile",
+                distance = 65.0,
+                duration = 3600000L, // 1 saat
+                difficulty = RouteDifficulty.MEDIUM
+            )
+        )
+    }
+    
     Column(
         modifier = modifier.fillMaxSize()
     ) {
@@ -176,6 +206,45 @@ fun MapScreen(
                                     .add(startLatLng, endLatLng)
                                     .width(8f)
                                     .color(0xFF2196F3.toInt())
+                            )
+                        }
+                        
+                        // Kullanıcının geçmiş rotalarını haritaya ekle (farklı renkte)
+                        userHistoryRoutes.forEach { route ->
+                            val startLatLng = when (route.startLocation) {
+                                "İstanbul" -> LatLng(41.0082, 28.9784)
+                                "Kartal" -> LatLng(40.9033, 29.1919)
+                                "Şile" -> LatLng(41.1753, 29.6133)
+                                else -> LatLng(41.0082, 28.9784)
+                            }
+                            
+                            val endLatLng = when (route.endLocation) {
+                                "Kartal" -> LatLng(40.9033, 29.1919)
+                                "Şile" -> LatLng(41.1753, 29.6133)
+                                else -> LatLng(41.0082, 28.9784)
+                            }
+                            
+                            // Geçmiş rota marker'ları (farklı renkte)
+                            googleMap.addMarker(
+                                MarkerOptions()
+                                    .position(startLatLng)
+                                    .title(route.name)
+                                    .snippet("Geçmiş: ${route.startLocation}")
+                            )
+                            
+                            googleMap.addMarker(
+                                MarkerOptions()
+                                    .position(endLatLng)
+                                    .title(route.name)
+                                    .snippet("Geçmiş: ${route.endLocation}")
+                            )
+                            
+                            // Geçmiş rota çizgisi (yeşil renkte)
+                            googleMap.addPolyline(
+                                PolylineOptions()
+                                    .add(startLatLng, endLatLng)
+                                    .width(6f)
+                                    .color(0xFF4CAF50.toInt()) // Yeşil
                             )
                         }
                         

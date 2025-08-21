@@ -303,27 +303,65 @@ fun MapScreen(
     // Rota arama dialog
     if (showRouteSearchDialog) {
         var searchQuery by remember { mutableStateOf("") }
+        var searchResults by remember { mutableStateOf<List<String>>(emptyList()) }
         
         AlertDialog(
             onDismissRequest = { showRouteSearchDialog = false },
             title = { Text("Rota Ara") },
             text = {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = { Text("Rota adı veya konum") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { 
+                            searchQuery = it
+                            // Arama sonuçlarını simüle et
+                            if (it.isNotBlank()) {
+                                searchResults = listOf(
+                                    "İstanbul - Bursa",
+                                    "İstanbul - Ankara",
+                                    "İstanbul - İzmir",
+                                    "Bursa - İzmir",
+                                    "Ankara - İzmir"
+                                ).filter { location -> location.contains(it, ignoreCase = true) }
+                            } else {
+                                searchResults = emptyList()
+                            }
+                        },
+                        label = { Text("Nereye gitmek istiyorsunuz?") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    if (searchResults.isNotEmpty()) {
+                        Text("Öneriler:", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        searchResults.forEach { result ->
+                            TextButton(
+                                onClick = {
+                                    // Rota çizme işlemi
+                                    searchQuery = result
+                                    showRouteSearchDialog = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(result)
+                            }
+                        }
+                    }
+                }
             },
             confirmButton = {
                 TextButton(
-                    onClick = { 
-                        // Rota arama işlemi
-                        showRouteSearchDialog = false 
-                    },
-                    enabled = searchQuery.isNotEmpty()
+                    onClick = {
+                        if (searchQuery.isNotBlank()) {
+                            // Rota çizme işlemi
+                            showRouteSearchDialog = false
+                        }
+                    }
                 ) {
-                    Text("Ara")
+                    Text("Rota Çiz")
                 }
             },
             dismissButton = {

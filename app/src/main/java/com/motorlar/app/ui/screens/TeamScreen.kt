@@ -420,22 +420,39 @@ fun CreateTeamDialog(
     onConfirm: (String) -> Unit
 ) {
     var teamName by remember { mutableStateOf("") }
+    var teamDescription by remember { mutableStateOf("") }
     
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Yeni Takım Oluştur") },
         text = {
-            OutlinedTextField(
-                value = teamName,
-                onValueChange = { teamName = it },
-                label = { Text("Takım Adı") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column {
+                OutlinedTextField(
+                    value = teamName,
+                    onValueChange = { teamName = it },
+                    label = { Text("Takım Adı") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = teamDescription,
+                    onValueChange = { teamDescription = it },
+                    label = { Text("Açıklama (İsteğe bağlı)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2
+                )
+            }
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(teamName) },
-                enabled = teamName.isNotEmpty()
+                onClick = { 
+                    if (teamName.isNotBlank()) {
+                        onConfirm(teamName)
+                    }
+                },
+                enabled = teamName.isNotBlank()
             ) {
                 Text("Oluştur")
             }

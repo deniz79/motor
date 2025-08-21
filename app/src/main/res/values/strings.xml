@@ -2,6 +2,7 @@
     <string name="app_name">Motorlar</string>
     
     <!-- Navigation -->
+    <string name="auth">Giriş</string>
     <string name="home">Ana Sayfa</string>
     <string name="map">Harita</string>
     <string name="record">Kayıt</string>

@@ -7,20 +7,20 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface UserDao {
     
-    @Query("SELECT * FROM users WHERE id = :userId")
-    suspend fun getUserById(userId: String): User?
-    
-    @Query("SELECT * FROM users WHERE username = :username")
-    suspend fun getUserByUsername(username: String): User?
-    
-    @Query("SELECT * FROM users WHERE email = :email")
+    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
     suspend fun getUserByEmail(email: String): User?
     
-    @Query("SELECT * FROM users WHERE isOnline = 1")
-    fun getOnlineUsers(): Flow<List<User>>
+    @Query("SELECT * FROM users WHERE username = :username LIMIT 1")
+    suspend fun getUserByUsername(username: String): User?
+    
+    @Query("SELECT * FROM users WHERE id = :userId")
+    suspend fun getUserById(userId: Long): User?
+    
+    @Query("SELECT * FROM users WHERE isActive = 1")
+    fun getAllActiveUsers(): Flow<List<User>>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertUser(user: User)
+    suspend fun insertUser(user: User): Long
     
     @Update
     suspend fun updateUser(user: User)
@@ -28,15 +28,9 @@ interface UserDao {
     @Delete
     suspend fun deleteUser(user: User)
     
-    @Query("UPDATE users SET isOnline = :isOnline, lastActiveAt = :timestamp WHERE id = :userId")
-    suspend fun updateUserOnlineStatus(userId: String, isOnline: Boolean, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE users SET lastLoginAt = :timestamp WHERE id = :userId")
+    suspend fun updateLastLogin(userId: Long, timestamp: Long = System.currentTimeMillis())
     
-    @Query("UPDATE users SET currentLocation = :location WHERE id = :userId")
-    suspend fun updateUserLocation(userId: String, location: String)
-    
-    @Query("UPDATE users SET totalDistance = totalDistance + :distance WHERE id = :userId")
-    suspend fun updateUserTotalDistance(userId: String, distance: Double)
-    
-    @Query("UPDATE users SET totalRoutes = totalRoutes + 1 WHERE id = :userId")
-    suspend fun incrementUserTotalRoutes(userId: String)
+    @Query("UPDATE users SET totalRides = totalRides + 1, totalDistance = totalDistance + :distance, totalTime = totalTime + :time WHERE id = :userId")
+    suspend fun updateUserStats(userId: Long, distance: Double, time: Long)
 }

@@ -3,6 +3,8 @@ package com.motorlar.app.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -32,6 +34,10 @@ fun HomeScreen(
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showNotificationsDialog by remember { mutableStateOf(false) }
     var showRouteDetailDialog by remember { mutableStateOf<Route?>(null) }
+    var showDownloadDialog by remember { mutableStateOf(false) }
+    var showCommentDialog by remember { mutableStateOf(false) }
+    var showShareDialog by remember { mutableStateOf(false) }
+    var selectedRouteForAction by remember { mutableStateOf<Route?>(null) }
     
     // Örnek rotalar
     val sampleRoutes = remember {
@@ -180,9 +186,21 @@ fun HomeScreen(
                 RouteCard(
                     route = route,
                     onRouteClick = { showRouteDetailDialog = route },
-                    onDownload = { /* İndirme işlemi */ },
-                    onComment = { /* Yorum işlemi */ },
-                    onShare = { /* Paylaşım işlemi */ }
+                    onDownload = { 
+                        // İndirme işlemi
+                        showDownloadDialog = true
+                        selectedRouteForAction = route
+                    },
+                    onComment = { 
+                        // Yorum işlemi
+                        showCommentDialog = true
+                        selectedRouteForAction = route
+                    },
+                    onShare = { 
+                        // Paylaşım işlemi
+                        showShareDialog = true
+                        selectedRouteForAction = route
+                    }
                 )
             }
         }
@@ -248,34 +266,95 @@ fun HomeScreen(
     if (showNewRouteDialog) {
         var routeName by remember { mutableStateOf("") }
         var routeDescription by remember { mutableStateOf("") }
+        var selectedMotorcycleType by remember { mutableStateOf<MotorcycleType?>(null) }
+        var selectedDifficulty by remember { mutableStateOf<RouteDifficulty?>(null) }
+        var startLocation by remember { mutableStateOf("") }
+        var endLocation by remember { mutableStateOf("") }
         
         AlertDialog(
             onDismissRequest = { showNewRouteDialog = false },
             title = { Text("Yeni Rota Ekle") },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
                     OutlinedTextField(
                         value = routeName,
                         onValueChange = { routeName = it },
                         label = { Text("Rota Adı") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    
                     Spacer(modifier = Modifier.height(8.dp))
+                    
                     OutlinedTextField(
                         value = routeDescription,
                         onValueChange = { routeDescription = it },
                         label = { Text("Açıklama") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    OutlinedTextField(
+                        value = startLocation,
+                        onValueChange = { startLocation = it },
+                        label = { Text("Başlangıç Noktası") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    OutlinedTextField(
+                        value = endLocation,
+                        onValueChange = { endLocation = it },
+                        label = { Text("Bitiş Noktası") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text("Motor Tipi:", fontWeight = FontWeight.Bold)
+                    MotorcycleType.values().forEach { type ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedMotorcycleType == type,
+                                onClick = { selectedMotorcycleType = type }
+                            )
+                            Text(type.name)
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text("Zorluk:", fontWeight = FontWeight.Bold)
+                    RouteDifficulty.values().forEach { difficulty ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedDifficulty == difficulty,
+                                onClick = { selectedDifficulty = difficulty }
+                            )
+                            Text(difficulty.name)
+                        }
+                    }
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // Yeni rota ekleme işlemi
-                        showNewRouteDialog = false
+                        if (routeName.isNotBlank() && selectedMotorcycleType != null && selectedDifficulty != null) {
+                            // Yeni rota ekleme işlemi
+                            showNewRouteDialog = false
+                        }
                     },
-                    enabled = routeName.isNotEmpty()
+                    enabled = routeName.isNotBlank() && selectedMotorcycleType != null && selectedDifficulty != null
                 ) {
                     Text("Ekle")
                 }
@@ -368,6 +447,134 @@ fun HomeScreen(
             confirmButton = {
                 TextButton(onClick = { showRouteDetailDialog = null }) {
                     Text("Kapat")
+                }
+            }
+        )
+    }
+    
+    // İndirme dialog
+    if (showDownloadDialog) {
+        AlertDialog(
+            onDismissRequest = { showDownloadDialog = false },
+            title = { Text("Rota İndir") },
+            text = {
+                Column {
+                    selectedRouteForAction?.let { route ->
+                        Text("${route.name} rotasını indirmek istiyor musunuz?")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Mesafe: ${route.distance} km")
+                        Text("Süre: ${route.duration} dk")
+                        Text("Zorluk: ${route.difficulty.name}")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // İndirme işlemi
+                        showDownloadDialog = false
+                        selectedRouteForAction = null
+                    }
+                ) {
+                    Text("İndir")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDownloadDialog = false
+                        selectedRouteForAction = null
+                    }
+                ) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Yorum dialog
+    if (showCommentDialog) {
+        var commentText by remember { mutableStateOf("") }
+        
+        AlertDialog(
+            onDismissRequest = { showCommentDialog = false },
+            title = { Text("Yorum Yap") },
+            text = {
+                Column {
+                    selectedRouteForAction?.let { route ->
+                        Text("${route.name} rotası için yorumunuz:")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = commentText,
+                            onValueChange = { commentText = it },
+                            label = { Text("Yorumunuz") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 3
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Yorum gönderme işlemi
+                        showCommentDialog = false
+                        selectedRouteForAction = null
+                        commentText = ""
+                    }
+                ) {
+                    Text("Gönder")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showCommentDialog = false
+                        selectedRouteForAction = null
+                        commentText = ""
+                    }
+                ) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Paylaş dialog
+    if (showShareDialog) {
+        AlertDialog(
+            onDismissRequest = { showShareDialog = false },
+            title = { Text("Rota Paylaş") },
+            text = {
+                Column {
+                    selectedRouteForAction?.let { route ->
+                        Text("${route.name} rotasını paylaşmak istiyor musunuz?")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Mesafe: ${route.distance} km")
+                        Text("Süre: ${route.duration} dk")
+                        Text("Zorluk: ${route.difficulty.name}")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Paylaşım işlemi
+                        showShareDialog = false
+                        selectedRouteForAction = null
+                    }
+                ) {
+                    Text("Paylaş")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showShareDialog = false
+                        selectedRouteForAction = null
+                    }
+                ) {
+                    Text("İptal")
                 }
             }
         )

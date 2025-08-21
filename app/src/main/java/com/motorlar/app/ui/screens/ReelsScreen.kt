@@ -31,60 +31,62 @@ fun ReelsScreen(
     var showCommentsDialog by remember { mutableStateOf<ReelPost?>(null) }
     var showShareDialog by remember { mutableStateOf<ReelPost?>(null) }
     
-    // Örnek reel verileri
-    val reels = remember {
-        listOf(
-            ReelPost(
-                id = 1,
-                username = "Motorcu_Ahmet",
-                userAvatar = "A",
-                location = "Sapanca Gölü, Sakarya",
-                description = "Harika bir gün! Sapanca'da muhteşem manzara 🏍️ #motor #sapanca #manzara",
-                likes = 245,
-                comments = 18,
-                shares = 12,
-                isLiked = false,
-                isVideo = true,
-                videoUrl = "sample_video_1"
-            ),
-            ReelPost(
-                id = 2,
-                username = "Rider_Merve",
-                userAvatar = "M",
-                location = "Abant Gölü, Bolu",
-                description = "Abant'ta virajların keyfini çıkardık ✨ #abant #viraj #motorcu",
-                likes = 189,
-                comments = 23,
-                shares = 8,
-                isLiked = true,
-                isVideo = true,
-                videoUrl = "sample_video_2"
-            ),
-            ReelPost(
-                id = 3,
-                username = "Biker_Can",
-                userAvatar = "C",
-                location = "Çeşme Sahili, İzmir",
-                description = "Çeşme'de güneş batımı 🌅 #çeşme #güneşbatımı #sahil",
-                likes = 312,
-                comments = 31,
-                shares = 15,
-                isLiked = false,
-                isVideo = true,
-                videoUrl = "sample_video_3"
-            ),
-            ReelPost(
-                id = 4,
-                username = "Road_Rider",
-                userAvatar = "R",
-                location = "Kapadokya, Nevşehir",
-                description = "Kapadokya'nın büyülü atmosferi 🏺 #kapadokya #balon #motor",
-                likes = 456,
-                comments = 42,
-                shares = 28,
-                isLiked = false,
-                isVideo = true,
-                videoUrl = "sample_video_4"
+    // Örnek reel verileri (mutable state)
+    var reels by remember {
+        mutableStateOf(
+            listOf(
+                ReelPost(
+                    id = 1,
+                    username = "Motorcu_Ahmet",
+                    userAvatar = "A",
+                    location = "Sapanca Gölü, Sakarya",
+                    description = "Harika bir gün! Sapanca'da muhteşem manzara 🏍️ #motor #sapanca #manzara",
+                    likes = 245,
+                    comments = 18,
+                    shares = 12,
+                    isLiked = false,
+                    isVideo = true,
+                    videoUrl = "sample_video_1"
+                ),
+                ReelPost(
+                    id = 2,
+                    username = "Rider_Merve",
+                    userAvatar = "M",
+                    location = "Abant Gölü, Bolu",
+                    description = "Abant'ta virajların keyfini çıkardık ✨ #abant #viraj #motorcu",
+                    likes = 189,
+                    comments = 23,
+                    shares = 8,
+                    isLiked = true,
+                    isVideo = true,
+                    videoUrl = "sample_video_2"
+                ),
+                ReelPost(
+                    id = 3,
+                    username = "Biker_Can",
+                    userAvatar = "C",
+                    location = "Çeşme Sahili, İzmir",
+                    description = "Çeşme'de güneş batımı 🌅 #çeşme #güneşbatımı #sahil",
+                    likes = 312,
+                    comments = 31,
+                    shares = 15,
+                    isLiked = false,
+                    isVideo = true,
+                    videoUrl = "sample_video_3"
+                ),
+                ReelPost(
+                    id = 4,
+                    username = "Road_Rider",
+                    userAvatar = "R",
+                    location = "Kapadokya, Nevşehir",
+                    description = "Kapadokya'nın büyülü atmosferi 🏺 #kapadokya #balon #motor",
+                    likes = 456,
+                    comments = 42,
+                    shares = 28,
+                    isLiked = false,
+                    isVideo = true,
+                    videoUrl = "sample_video_4"
+                )
             )
         )
     }
@@ -123,6 +125,10 @@ fun ReelsScreen(
                         },
                         onLikeClick = { 
                             // Beğeni işlemi
+                            reels = reels.map { 
+                                if (it.id == reel.id) it.copy(isLiked = !it.isLiked, likes = if (it.isLiked) it.likes - 1 else it.likes + 1)
+                                else it 
+                            }
                         },
                         onCommentClick = { 
                             showCommentsDialog = reel

@@ -16,11 +16,23 @@ class MainViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
     
+    init {
+        // Uygulama başladığında kaydedilmiş kullanıcı bilgilerini kontrol et
+        checkSavedUser()
+    }
+
+    private fun checkSavedUser() {
+        // Burada SharedPreferences'dan kaydedilmiş kullanıcı bilgileri alınacak
+        // Şimdilik varsayılan olarak giriş yapılmamış durumda
+    }
+    
     fun loginUser(username: String) {
         _uiState.value = _uiState.value.copy(
             isLoggedIn = true,
             currentUser = username
         )
+        // Kullanıcı bilgilerini kaydet
+        saveUserCredentials(username)
     }
     
     fun logoutUser() {
@@ -28,6 +40,18 @@ class MainViewModel : ViewModel() {
             isLoggedIn = false,
             currentUser = null
         )
+        // Kullanıcı bilgilerini temizle
+        clearUserCredentials()
+    }
+
+    private fun saveUserCredentials(username: String) {
+        // SharedPreferences'a kullanıcı bilgilerini kaydet
+        // Bu gerçek uygulamada implement edilecek
+    }
+
+    private fun clearUserCredentials() {
+        // SharedPreferences'dan kullanıcı bilgilerini temizle
+        // Bu gerçek uygulamada implement edilecek
     }
     
     fun onLocationPermissionGranted() {

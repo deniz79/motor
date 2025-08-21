@@ -117,22 +117,38 @@ fun RouteDrawingScreen(
                             if (isDrawingRoute) {
                                 routePoints = routePoints + latLng
                                 
-                                // Yeni nokta marker'ı ekle
+                                // Durak noktası marker'ı ekle (farklı renkte)
                                 googleMap.addMarker(
                                     MarkerOptions()
                                         .position(latLng)
-                                        .title("Nokta ${routePoints.size}")
+                                        .title("Durak ${routePoints.size}")
                                         .snippet("${latLng.latitude}, ${latLng.longitude}")
                                 )
                                 
-                                // Rota çizgisini güncelle
+                                // Durak noktalarını birleştiren rota çizgisini güncelle
                                 if (routePoints.size > 1) {
-                                    googleMap.addPolyline(
-                                        PolylineOptions()
-                                            .add(routePoints[routePoints.size - 2], routePoints[routePoints.size - 1])
-                                            .width(8f)
-                                            .color(0xFF2196F3.toInt())
-                                    )
+                                    // Önceki çizgileri temizle
+                                    googleMap.clear()
+                                    
+                                    // Tüm durak noktalarını yeniden çiz
+                                    routePoints.forEachIndexed { index, point ->
+                                        googleMap.addMarker(
+                                            MarkerOptions()
+                                                .position(point)
+                                                .title("Durak ${index + 1}")
+                                                .snippet("${point.latitude}, ${point.longitude}")
+                                        )
+                                        
+                                        // Durak noktalarını birleştiren çizgi
+                                        if (index > 0) {
+                                            googleMap.addPolyline(
+                                                PolylineOptions()
+                                                    .add(routePoints[index - 1], point)
+                                                    .width(8f)
+                                                    .color(0xFF2196F3.toInt())
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

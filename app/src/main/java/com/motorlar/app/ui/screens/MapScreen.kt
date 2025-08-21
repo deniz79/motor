@@ -102,6 +102,7 @@ fun MapScreen(
     val userHistoryRoutes = remember {
         listOf(
             Route(
+                id = 4,
                 name = "Dünkü Rota",
                 description = "İstanbul - Kartal",
                 creatorId = 1,
@@ -114,6 +115,7 @@ fun MapScreen(
                 difficulty = RouteDifficulty.EASY
             ),
             Route(
+                id = 5,
                 name = "Geçen Hafta",
                 description = "İstanbul - Şile",
                 creatorId = 1,
@@ -126,6 +128,11 @@ fun MapScreen(
                 difficulty = RouteDifficulty.MEDIUM
             )
         )
+    }
+    
+    // Kaydedilen rotalar (kullanıcının oluşturduğu)
+    val savedRoutes = remember {
+        mutableStateListOf<Route>()
     }
     
     Column(
@@ -548,6 +555,73 @@ fun MapScreen(
             title = { Text("Kayıtlı Rotalar") },
             text = {
                 LazyColumn {
+                    // Kullanıcının oluşturduğu rotalar
+                    if (savedRoutes.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Oluşturduğum Rotalar",
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        items(savedRoutes) { route ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = route.name,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = route.description,
+                                        fontSize = 14.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text("${route.distance} km")
+                                        Text("${route.motorcycleType.displayName}")
+                                        Text("${route.difficulty.name}")
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                showSavedRoutesDialog = false
+                                                showDirectionsDialog = route
+                                            }
+                                        ) {
+                                            Text("Git")
+                                        }
+                                        OutlinedButton(
+                                            onClick = { /* Paylaş */ }
+                                        ) {
+                                            Text("Paylaş")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Popüler rotalar
+                    item {
+                        Text(
+                            text = "Popüler Rotalar",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
                     items(userRoutes) { route ->
                         Card(
                             modifier = Modifier
@@ -571,7 +645,7 @@ fun MapScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text("${route.distance} km")
-                                    Text("${route.motorcycleType.name}")
+                                    Text("${route.motorcycleType.displayName}")
                                     Text("${route.difficulty.name}")
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -580,7 +654,7 @@ fun MapScreen(
                                     horizontalArrangement = Arrangement.SpaceEvenly
                                 ) {
                                     OutlinedButton(
-                                        onClick = { 
+                                        onClick = {
                                             showSavedRoutesDialog = false
                                             showDirectionsDialog = route
                                         }

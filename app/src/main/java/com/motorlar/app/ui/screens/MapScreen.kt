@@ -24,6 +24,16 @@ fun MapScreen(
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var isMapReady by remember { mutableStateOf(false) }
     
+    // Dialog states
+    var showLocationSettingsDialog by remember { mutableStateOf(false) }
+    var showMapLayersDialog by remember { mutableStateOf(false) }
+    var showFiltersDialog by remember { mutableStateOf(false) }
+    var showRouteSearchDialog by remember { mutableStateOf(false) }
+    var showSavedRoutesDialog by remember { mutableStateOf(false) }
+    var showTrafficDialog by remember { mutableStateOf(false) }
+    var showRouteDrawingDialog by remember { mutableStateOf(false) }
+    var showNearbyRoutesDialog by remember { mutableStateOf(false) }
+    
     // İstanbul koordinatları (varsayılan)
     val istanbul = LatLng(41.0082, 28.9784)
     
@@ -34,13 +44,13 @@ fun MapScreen(
         TopAppBar(
             title = { Text("Harita", fontWeight = FontWeight.Bold) },
             actions = {
-                IconButton(onClick = { /* Konum ayarları */ }) {
+                IconButton(onClick = { showLocationSettingsDialog = true }) {
                     Icon(Icons.Default.LocationOn, "Konum")
                 }
-                IconButton(onClick = { /* Harita ayarları */ }) {
+                IconButton(onClick = { showMapLayersDialog = true }) {
                     Icon(Icons.Default.Layers, "Katmanlar")
                 }
-                IconButton(onClick = { /* Filtreler */ }) {
+                IconButton(onClick = { showFiltersDialog = true }) {
                     Icon(Icons.Default.FilterList, "Filtreler")
                 }
             }
@@ -103,7 +113,7 @@ fun MapScreen(
                 ) {
                     // Rota çizme butonu
                     FloatingActionButton(
-                        onClick = { /* Rota çizmeye başla */ },
+                        onClick = { showRouteDrawingDialog = true },
                         modifier = Modifier.size(56.dp)
                     ) {
                         Icon(Icons.Default.Timeline, "Rota Çiz")
@@ -111,7 +121,7 @@ fun MapScreen(
                     
                     // Yakın rotalar butonu
                     FloatingActionButton(
-                        onClick = { /* Yakın rotaları göster */ },
+                        onClick = { showNearbyRoutesDialog = true },
                         modifier = Modifier.size(56.dp)
                     ) {
                         Icon(Icons.Default.NearMe, "Yakın Rotalar")
@@ -119,7 +129,11 @@ fun MapScreen(
                     
                     // Konum butonu
                     FloatingActionButton(
-                        onClick = { /* Mevcut konuma git */ },
+                        onClick = { 
+                            mapView?.getMapAsync { map ->
+                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(istanbul, 15f))
+                            }
+                        },
                         modifier = Modifier.size(56.dp)
                     ) {
                         Icon(Icons.Default.MyLocation, "Konumum")
@@ -152,7 +166,7 @@ fun MapScreen(
                 ) {
                     // Rota arama
                     OutlinedButton(
-                        onClick = { /* Rota ara */ }
+                        onClick = { showRouteSearchDialog = true }
                     ) {
                         Icon(Icons.Default.Search, "Ara")
                         Spacer(modifier = Modifier.width(4.dp))
@@ -161,7 +175,7 @@ fun MapScreen(
                     
                     // Kayıtlı rotalar
                     OutlinedButton(
-                        onClick = { /* Kayıtlı rotalar */ }
+                        onClick = { showSavedRoutesDialog = true }
                     ) {
                         Icon(Icons.Default.Bookmark, "Kayıtlı")
                         Spacer(modifier = Modifier.width(4.dp))
@@ -170,7 +184,7 @@ fun MapScreen(
                     
                     // Trafik
                     OutlinedButton(
-                        onClick = { /* Trafik durumu */ }
+                        onClick = { showTrafficDialog = true }
                     ) {
                         Icon(Icons.Default.Traffic, "Trafik")
                         Spacer(modifier = Modifier.width(4.dp))
@@ -179,5 +193,248 @@ fun MapScreen(
                 }
             }
         }
+    }
+    
+    // Konum ayarları dialog
+    if (showLocationSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showLocationSettingsDialog = false },
+            title = { Text("Konum Ayarları") },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = { /* Konum izni ver */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Konum İzni Ver")
+                    }
+                    TextButton(
+                        onClick = { /* Konum ayarlarını aç */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Konum Ayarlarını Aç")
+                    }
+                    TextButton(
+                        onClick = { /* GPS ayarları */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("GPS Ayarları")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLocationSettingsDialog = false }) {
+                    Text("Kapat")
+                }
+            }
+        )
+    }
+    
+    // Harita katmanları dialog
+    if (showMapLayersDialog) {
+        AlertDialog(
+            onDismissRequest = { showMapLayersDialog = false },
+            title = { Text("Harita Katmanları") },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = { /* Uydu görünümü */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Uydu Görünümü")
+                    }
+                    TextButton(
+                        onClick = { /* Terrain görünümü */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Arazi Görünümü")
+                    }
+                    TextButton(
+                        onClick = { /* Normal görünüm */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Normal Görünüm")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showMapLayersDialog = false }) {
+                    Text("Kapat")
+                }
+            }
+        )
+    }
+    
+    // Filtreler dialog
+    if (showFiltersDialog) {
+        AlertDialog(
+            onDismissRequest = { showFiltersDialog = false },
+            title = { Text("Harita Filtreleri") },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = { /* Motor tipi filtresi */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Motor Tipi")
+                    }
+                    TextButton(
+                        onClick = { /* Zorluk filtresi */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Zorluk Seviyesi")
+                    }
+                    TextButton(
+                        onClick = { /* Mesafe filtresi */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Mesafe")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showFiltersDialog = false }) {
+                    Text("Kapat")
+                }
+            }
+        )
+    }
+    
+    // Rota arama dialog
+    if (showRouteSearchDialog) {
+        var searchQuery by remember { mutableStateOf("") }
+        
+        AlertDialog(
+            onDismissRequest = { showRouteSearchDialog = false },
+            title = { Text("Rota Ara") },
+            text = {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Rota adı veya konum") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { 
+                        // Rota arama işlemi
+                        showRouteSearchDialog = false 
+                    },
+                    enabled = searchQuery.isNotEmpty()
+                ) {
+                    Text("Ara")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRouteSearchDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Kayıtlı rotalar dialog
+    if (showSavedRoutesDialog) {
+        AlertDialog(
+            onDismissRequest = { showSavedRoutesDialog = false },
+            title = { Text("Kayıtlı Rotalar") },
+            text = {
+                Column {
+                    Text("İstanbul - Sapanca Gölü")
+                    Text("Bolu - Abant Gölü")
+                    Text("İzmir - Çeşme Sahil")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Toplam: 3 kayıtlı rota")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSavedRoutesDialog = false }) {
+                    Text("Kapat")
+                }
+            }
+        )
+    }
+    
+    // Trafik dialog
+    if (showTrafficDialog) {
+        AlertDialog(
+            onDismissRequest = { showTrafficDialog = false },
+            title = { Text("Trafik Durumu") },
+            text = {
+                Column {
+                    Text("Mevcut konum: Yoğun trafik")
+                    Text("İstanbul merkez: Orta yoğunluk")
+                    Text("Sapanca yolu: Açık")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Son güncelleme: 5 dk önce")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showTrafficDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
+    }
+    
+    // Rota çizme dialog
+    if (showRouteDrawingDialog) {
+        AlertDialog(
+            onDismissRequest = { showRouteDrawingDialog = false },
+            title = { Text("Rota Çizme") },
+            text = {
+                Column {
+                    Text("Haritada tıklayarak rota çizebilirsiniz")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("• Başlangıç noktasına tıklayın")
+                    Text("• Ara noktalara tıklayın")
+                    Text("• Bitiş noktasına çift tıklayın")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { 
+                        // Rota çizme modunu başlat
+                        showRouteDrawingDialog = false 
+                    }
+                ) {
+                    Text("Başlat")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRouteDrawingDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Yakın rotalar dialog
+    if (showNearbyRoutesDialog) {
+        AlertDialog(
+            onDismissRequest = { showNearbyRoutesDialog = false },
+            title = { Text("Yakın Rotalar") },
+            text = {
+                Column {
+                    Text("5 km içinde:")
+                    Text("• İstanbul - Sapanca (2.3 km)")
+                    Text("• Bolu - Abant (4.1 km)")
+                    Text("• İzmir - Çeşme (4.8 km)")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Toplam: 3 rota bulundu")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showNearbyRoutesDialog = false }) {
+                    Text("Göster")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNearbyRoutesDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
     }
 }

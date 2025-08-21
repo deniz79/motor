@@ -25,6 +25,14 @@ fun HomeScreen(
     var selectedMotorcycleType by remember { mutableStateOf<MotorcycleType?>(null) }
     var selectedDifficulty by remember { mutableStateOf<RouteDifficulty?>(null) }
     
+    // Dialog states
+    var showMotorcycleTypeDialog by remember { mutableStateOf(false) }
+    var showDifficultyDialog by remember { mutableStateOf(false) }
+    var showNewRouteDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var showNotificationsDialog by remember { mutableStateOf(false) }
+    var showRouteDetailDialog by remember { mutableStateOf<Route?>(null) }
+    
     // Örnek rotalar
     val sampleRoutes = remember {
         listOf(
@@ -83,10 +91,10 @@ fun HomeScreen(
         TopAppBar(
             title = { Text("Motorlar", fontWeight = FontWeight.Bold) },
             actions = {
-                IconButton(onClick = { /* Bildirimler */ }) {
+                IconButton(onClick = { showNotificationsDialog = true }) {
                     Icon(Icons.Default.Notifications, "Bildirimler")
                 }
-                IconButton(onClick = { /* Ayarlar */ }) {
+                IconButton(onClick = { showSettingsDialog = true }) {
                     Icon(Icons.Default.Settings, "Ayarlar")
                 }
             }
@@ -124,8 +132,8 @@ fun HomeScreen(
                     // Motor tipi filtresi
                     FilterChip(
                         selected = selectedMotorcycleType != null,
-                        onClick = { /* Motor tipi seçimi */ },
-                        label = { Text("Motor Tipi") },
+                        onClick = { showMotorcycleTypeDialog = true },
+                        label = { Text(selectedMotorcycleType?.name ?: "Motor Tipi") },
                         leadingIcon = {
                             Icon(Icons.Default.Motorcycle, "Motor")
                         }
@@ -134,8 +142,8 @@ fun HomeScreen(
                     // Zorluk filtresi
                     FilterChip(
                         selected = selectedDifficulty != null,
-                        onClick = { /* Zorluk seçimi */ },
-                        label = { Text("Zorluk") },
+                        onClick = { showDifficultyDialog = true },
+                        label = { Text(selectedDifficulty?.name ?: "Zorluk") },
                         leadingIcon = {
                             Icon(Icons.Default.Star, "Zorluk")
                         }
@@ -146,7 +154,7 @@ fun HomeScreen(
             // Yeni rota ekleme butonu
             item {
                 Button(
-                    onClick = { /* Yeni rota ekleme */ },
+                    onClick = { showNewRouteDialog = true },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
@@ -169,19 +177,216 @@ fun HomeScreen(
             
             // Rota listesi
             items(sampleRoutes) { route ->
-                RouteCard(route = route)
+                RouteCard(
+                    route = route,
+                    onRouteClick = { showRouteDetailDialog = route },
+                    onDownload = { /* İndirme işlemi */ },
+                    onComment = { /* Yorum işlemi */ },
+                    onShare = { /* Paylaşım işlemi */ }
+                )
             }
         }
+    }
+    
+    // Motor tipi seçim dialog
+    if (showMotorcycleTypeDialog) {
+        AlertDialog(
+            onDismissRequest = { showMotorcycleTypeDialog = false },
+            title = { Text("Motor Tipi Seçin") },
+            text = {
+                Column {
+                    MotorcycleType.values().forEach { type ->
+                        TextButton(
+                            onClick = {
+                                selectedMotorcycleType = type
+                                showMotorcycleTypeDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(type.name)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showMotorcycleTypeDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Zorluk seviyesi seçim dialog
+    if (showDifficultyDialog) {
+        AlertDialog(
+            onDismissRequest = { showDifficultyDialog = false },
+            title = { Text("Zorluk Seviyesi Seçin") },
+            text = {
+                Column {
+                    RouteDifficulty.values().forEach { difficulty ->
+                        TextButton(
+                            onClick = {
+                                selectedDifficulty = difficulty
+                                showDifficultyDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(difficulty.name)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDifficultyDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Yeni rota ekleme dialog
+    if (showNewRouteDialog) {
+        var routeName by remember { mutableStateOf("") }
+        var routeDescription by remember { mutableStateOf("") }
+        
+        AlertDialog(
+            onDismissRequest = { showNewRouteDialog = false },
+            title = { Text("Yeni Rota Ekle") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = routeName,
+                        onValueChange = { routeName = it },
+                        label = { Text("Rota Adı") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = routeDescription,
+                        onValueChange = { routeDescription = it },
+                        label = { Text("Açıklama") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Yeni rota ekleme işlemi
+                        showNewRouteDialog = false
+                    },
+                    enabled = routeName.isNotEmpty()
+                ) {
+                    Text("Ekle")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNewRouteDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Ayarlar dialog
+    if (showSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showSettingsDialog = false },
+            title = { Text("Ayarlar") },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = { /* Profil ayarları */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Profil Ayarları")
+                    }
+                    TextButton(
+                        onClick = { /* Bildirim ayarları */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Bildirim Ayarları")
+                    }
+                    TextButton(
+                        onClick = { /* Gizlilik ayarları */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Gizlilik Ayarları")
+                    }
+                    TextButton(
+                        onClick = { /* Uygulama ayarları */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Uygulama Ayarları")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSettingsDialog = false }) {
+                    Text("Kapat")
+                }
+            }
+        )
+    }
+    
+    // Bildirimler dialog
+    if (showNotificationsDialog) {
+        AlertDialog(
+            onDismissRequest = { showNotificationsDialog = false },
+            title = { Text("Bildirimler") },
+            text = {
+                Column {
+                    Text("Yeni bildirim yok")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Tüm bildirimleriniz burada görünecek")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showNotificationsDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
+    }
+    
+    // Rota detay dialog
+    showRouteDetailDialog?.let { route ->
+        AlertDialog(
+            onDismissRequest = { showRouteDetailDialog = null },
+            title = { Text(route.name) },
+            text = {
+                Column {
+                    Text(route.description)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Mesafe: ${route.distance} km")
+                    Text("Süre: ${route.duration} dk")
+                    Text("Zorluk: ${route.difficulty.name}")
+                    Text("Motor Tipi: ${route.motorcycleType.name}")
+                    Text("Puan: ${route.rating} (${route.reviewCount} yorum)")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showRouteDetailDialog = null }) {
+                    Text("Kapat")
+                }
+            }
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RouteCard(route: Route) {
+fun RouteCard(
+    route: Route,
+    onRouteClick: () -> Unit,
+    onDownload: () -> Unit,
+    onComment: () -> Unit,
+    onShare: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        onClick = { /* Rota detayına git */ }
+        onClick = onRouteClick
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -270,7 +475,7 @@ fun RouteCard(route: Route) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 OutlinedButton(
-                    onClick = { /* İndir */ },
+                    onClick = onDownload,
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Default.Download, "İndir")
@@ -281,7 +486,7 @@ fun RouteCard(route: Route) {
                 Spacer(modifier = Modifier.width(8.dp))
                 
                 OutlinedButton(
-                    onClick = { /* Yorum yap */ },
+                    onClick = onComment,
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Default.Comment, "Yorum")
@@ -292,7 +497,7 @@ fun RouteCard(route: Route) {
                 Spacer(modifier = Modifier.width(8.dp))
                 
                 OutlinedButton(
-                    onClick = { /* Paylaş */ },
+                    onClick = onShare,
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Default.Share, "Paylaş")

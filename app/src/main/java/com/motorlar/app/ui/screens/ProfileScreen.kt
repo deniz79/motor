@@ -23,6 +23,18 @@ fun ProfileScreen(
 ) {
     var showEditProfileDialog by remember { mutableStateOf(false) }
     
+    // Dialog states
+    var showPersonalInfoDialog by remember { mutableStateOf(false) }
+    var showMotorcycleInfoDialog by remember { mutableStateOf(false) }
+    var showRideStatisticsDialog by remember { mutableStateOf(false) }
+    var showSavedRoutesDialog by remember { mutableStateOf(false) }
+    var showTeamSettingsDialog by remember { mutableStateOf(false) }
+    var showNotificationSettingsDialog by remember { mutableStateOf(false) }
+    var showPrivacySettingsDialog by remember { mutableStateOf(false) }
+    var showHelpDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    
     // Örnek kullanıcı bilgileri
     val userInfo = remember {
         UserProfile(
@@ -40,16 +52,16 @@ fun ProfileScreen(
     // Menü öğeleri
     val menuItems = remember {
         listOf(
-            MenuItem("Kişisel Bilgiler", Icons.Default.Person, "Profil bilgilerini düzenle"),
-            MenuItem("Motor Bilgileri", Icons.Default.Motorcycle, "Motor tipi ve özellikleri"),
-            MenuItem("Sürüş İstatistikleri", Icons.Default.Analytics, "Detaylı sürüş verileri"),
-            MenuItem("Kayıtlı Rotalar", Icons.Default.Bookmark, "Favori rotalarınız"),
-            MenuItem("Takım Ayarları", Icons.Default.Group, "Takım tercihleri"),
-            MenuItem("Bildirimler", Icons.Default.Notifications, "Bildirim ayarları"),
-            MenuItem("Gizlilik", Icons.Default.Security, "Gizlilik ayarları"),
-            MenuItem("Yardım", Icons.Default.Help, "Yardım ve destek"),
-            MenuItem("Hakkında", Icons.Default.Info, "Uygulama bilgileri"),
-            MenuItem("Çıkış Yap", Icons.Default.Logout, "Hesaptan çıkış")
+            MenuItem("Kişisel Bilgiler", Icons.Default.Person, "Profil bilgilerini düzenle") { showPersonalInfoDialog = true },
+            MenuItem("Motor Bilgileri", Icons.Default.Motorcycle, "Motor tipi ve özellikleri") { showMotorcycleInfoDialog = true },
+            MenuItem("Sürüş İstatistikleri", Icons.Default.Analytics, "Detaylı sürüş verileri") { showRideStatisticsDialog = true },
+            MenuItem("Kayıtlı Rotalar", Icons.Default.Bookmark, "Favori rotalarınız") { showSavedRoutesDialog = true },
+            MenuItem("Takım Ayarları", Icons.Default.Group, "Takım tercihleri") { showTeamSettingsDialog = true },
+            MenuItem("Bildirimler", Icons.Default.Notifications, "Bildirim ayarları") { showNotificationSettingsDialog = true },
+            MenuItem("Gizlilik", Icons.Default.Security, "Gizlilik ayarları") { showPrivacySettingsDialog = true },
+            MenuItem("Yardım", Icons.Default.Help, "Yardım ve destek") { showHelpDialog = true },
+            MenuItem("Hakkında", Icons.Default.Info, "Uygulama bilgileri") { showAboutDialog = true },
+            MenuItem("Çıkış Yap", Icons.Default.Logout, "Hesaptan çıkış") { showLogoutDialog = true }
         )
     }
     
@@ -63,7 +75,7 @@ fun ProfileScreen(
                 IconButton(onClick = { showEditProfileDialog = true }) {
                     Icon(Icons.Default.Edit, "Düzenle")
                 }
-                IconButton(onClick = { /* Ayarlar */ }) {
+                IconButton(onClick = { showNotificationSettingsDialog = true }) {
                     Icon(Icons.Default.Settings, "Ayarlar")
                 }
             }
@@ -99,6 +111,320 @@ fun ProfileScreen(
             onConfirm = { updatedUser ->
                 // Profil güncelleme işlemi
                 showEditProfileDialog = false
+            }
+        )
+    }
+    
+    // Kişisel bilgiler dialog
+    if (showPersonalInfoDialog) {
+        AlertDialog(
+            onDismissRequest = { showPersonalInfoDialog = false },
+            title = { Text("Kişisel Bilgiler") },
+            text = {
+                Column {
+                    Text("Ad Soyad: ${userInfo.name}")
+                    Text("E-posta: ${userInfo.email}")
+                    Text("Telefon: +90 555 123 4567")
+                    Text("Doğum Tarihi: 15 Mart 1990")
+                    Text("Şehir: İstanbul")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Bu bilgileri düzenlemek için profil düzenle butonunu kullanın.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPersonalInfoDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
+    }
+    
+    // Motor bilgileri dialog
+    if (showMotorcycleInfoDialog) {
+        AlertDialog(
+            onDismissRequest = { showMotorcycleInfoDialog = false },
+            title = { Text("Motor Bilgileri") },
+            text = {
+                Column {
+                    Text("Motor Tipi: ${userInfo.motorcycleType}")
+                    Text("Marka: Honda")
+                    Text("Model: CBR600RR")
+                    Text("Yıl: 2020")
+                    Text("Motor Hacmi: 600cc")
+                    Text("Renk: Kırmızı")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Deneyim Seviyesi: ${userInfo.experienceLevel}")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showMotorcycleInfoDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
+    }
+    
+    // Sürüş istatistikleri dialog
+    if (showRideStatisticsDialog) {
+        AlertDialog(
+            onDismissRequest = { showRideStatisticsDialog = false },
+            title = { Text("Sürüş İstatistikleri") },
+            text = {
+                Column {
+                    Text("Toplam Mesafe: ${userInfo.totalDistance.toInt()} km")
+                    Text("Toplam Süre: ${userInfo.totalTime.toInt()} saat")
+                    Text("Ortalama Hız: 85 km/h")
+                    Text("Maksimum Hız: 180 km/h")
+                    Text("Toplam Sürüş: 45 gün")
+                    Text("En Uzun Sürüş: 320 km")
+                    Text("Favori Rota: İstanbul - Sapanca")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Sürüş Puanı: 8.5/10")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showRideStatisticsDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
+    }
+    
+    // Kayıtlı rotalar dialog
+    if (showSavedRoutesDialog) {
+        AlertDialog(
+            onDismissRequest = { showSavedRoutesDialog = false },
+            title = { Text("Kayıtlı Rotalar") },
+            text = {
+                Column {
+                    Text("Favori Rotalar:")
+                    Text("• İstanbul - Sapanca Gölü")
+                    Text("• Bolu - Abant Gölü")
+                    Text("• İzmir - Çeşme Sahil")
+                    Text("• Kapadokya Turu")
+                    Text("• Ege Sahil Yolu")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Toplam: 5 kayıtlı rota")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSavedRoutesDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
+    }
+    
+    // Takım ayarları dialog
+    if (showTeamSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showTeamSettingsDialog = false },
+            title = { Text("Takım Ayarları") },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = { /* Konum paylaşımı */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Konum Paylaşımı: Açık")
+                    }
+                    TextButton(
+                        onClick = { /* Takım davetleri */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Takım Davetleri: Açık")
+                    }
+                    TextButton(
+                        onClick = { /* Otomatik takım katılımı */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Otomatik Katılım: Kapalı")
+                    }
+                    TextButton(
+                        onClick = { /* Takım bildirimleri */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Takım Bildirimleri: Açık")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showTeamSettingsDialog = false }) {
+                    Text("Kaydet")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTeamSettingsDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Bildirim ayarları dialog
+    if (showNotificationSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showNotificationSettingsDialog = false },
+            title = { Text("Bildirim Ayarları") },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = { /* Push bildirimleri */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Push Bildirimleri: Açık")
+                    }
+                    TextButton(
+                        onClick = { /* E-posta bildirimleri */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("E-posta Bildirimleri: Kapalı")
+                    }
+                    TextButton(
+                        onClick = { /* Rota önerileri */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Rota Önerileri: Açık")
+                    }
+                    TextButton(
+                        onClick = { /* Takım bildirimleri */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Takım Bildirimleri: Açık")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showNotificationSettingsDialog = false }) {
+                    Text("Kaydet")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNotificationSettingsDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Gizlilik ayarları dialog
+    if (showPrivacySettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showPrivacySettingsDialog = false },
+            title = { Text("Gizlilik Ayarları") },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = { /* Profil görünürlüğü */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Profil Görünürlüğü: Herkese Açık")
+                    }
+                    TextButton(
+                        onClick = { /* Konum paylaşımı */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Konum Paylaşımı: Sadece Takım")
+                    }
+                    TextButton(
+                        onClick = { /* Rota paylaşımı */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Rota Paylaşımı: Herkese Açık")
+                    }
+                    TextButton(
+                        onClick = { /* İstatistik paylaşımı */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("İstatistik Paylaşımı: Gizli")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacySettingsDialog = false }) {
+                    Text("Kaydet")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPrivacySettingsDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Yardım dialog
+    if (showHelpDialog) {
+        AlertDialog(
+            onDismissRequest = { showHelpDialog = false },
+            title = { Text("Yardım ve Destek") },
+            text = {
+                Column {
+                    Text("Sık Sorulan Sorular:")
+                    Text("• Rota nasıl oluşturulur?")
+                    Text("• Takıma nasıl katılırım?")
+                    Text("• Konum paylaşımı nasıl çalışır?")
+                    Text("• Rota kaydetme nasıl yapılır?")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Destek: support@motorlar.com")
+                    Text("Telefon: +90 212 555 0123")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showHelpDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
+    }
+    
+    // Hakkında dialog
+    if (showAboutDialog) {
+        AlertDialog(
+            onDismissRequest = { showAboutDialog = false },
+            title = { Text("Hakkında") },
+            text = {
+                Column {
+                    Text("Motorlar v1.0.0")
+                    Text("Motorcu rota uygulaması")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Geliştirici: Motorlar Team")
+                    Text("Lisans: MIT")
+                    Text("© 2024 Motorlar")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Bu uygulama motorcuların rotalarını paylaşması ve takip etmesi için geliştirilmiştir.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAboutDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
+    }
+    
+    // Çıkış yap dialog
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Çıkış Yap") },
+            text = {
+                Text("Hesabınızdan çıkış yapmak istediğinizden emin misiniz?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Çıkış yapma işlemi
+                        showLogoutDialog = false
+                    }
+                ) {
+                    Text("Çıkış Yap")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("İptal")
+                }
             }
         )
     }
@@ -230,7 +556,7 @@ fun MenuItemCard(menuItem: MenuItem) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        onClick = { /* Menü öğesi tıklama */ }
+        onClick = menuItem.onClick
     ) {
         Row(
             modifier = Modifier
@@ -424,5 +750,6 @@ data class UserProfile(
 data class MenuItem(
     val title: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector,
-    val description: String
+    val description: String,
+    val onClick: () -> Unit
 )

@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.motorlar.app.viewmodel.MainViewModel
+import com.motorlar.app.data.model.ReelPost
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -429,16 +430,4 @@ fun ReelCard(
     }
 }
 
-data class ReelPost(
-    val id: Int,
-    val username: String,
-    val userAvatar: String,
-    val location: String,
-    val description: String,
-    val likes: Int,
-    val comments: Int,
-    val shares: Int,
-    val isLiked: Boolean,
-    val isVideo: Boolean,
-    val videoUrl: String
-)
+

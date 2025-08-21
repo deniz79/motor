@@ -29,6 +29,8 @@ fun MapScreen(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
+    val currentUser = viewModel.uiState.collectAsState().value.currentUser
+    
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var isMapReady by remember { mutableStateOf(false) }
     var currentLocation by remember { mutableStateOf(LatLng(41.0082, 28.9784)) } // İstanbul
@@ -637,7 +639,7 @@ fun MapScreen(
                                 name = routeName,
                                 description = routeDescription,
                                 creatorId = 1,
-                                creatorName = viewModel.uiState.collectAsState().value.currentUser ?: "Kullanıcı",
+                                creatorName = currentUser ?: "Kullanıcı",
                                 motorcycleType = MotorcycleType.SPORT,
                                 startLocation = "Başlangıç",
                                 endLocation = "Bitiş",

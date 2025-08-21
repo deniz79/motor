@@ -61,7 +61,7 @@ fun MapScreen(
                 endLocation = "Sapanca",
                 distance = 120.0,
                 duration = 7200000L, // 2 saat
-                difficulty = RouteDifficulty.Medium
+                difficulty = RouteDifficulty.MEDIUM
             ),
             Route(
                 name = "İstanbul - Bursa",
@@ -73,7 +73,7 @@ fun MapScreen(
                 endLocation = "Bursa",
                 distance = 150.0,
                 duration = 9000000L, // 2.5 saat
-                difficulty = RouteDifficulty.Easy
+                difficulty = RouteDifficulty.EASY
             ),
             Route(
                 name = "İstanbul - İzmit",
@@ -85,7 +85,7 @@ fun MapScreen(
                 endLocation = "İzmit",
                 distance = 80.0,
                 duration = 5400000L, // 1.5 saat
-                difficulty = RouteDifficulty.Easy
+                difficulty = RouteDifficulty.EASY
             )
         )
     }
@@ -643,7 +643,7 @@ fun MapScreen(
                                 endLocation = "Bitiş",
                                 distance = 0.0,
                                 duration = 0L,
-                                difficulty = RouteDifficulty.Easy
+                                difficulty = RouteDifficulty.EASY
                             )
                             routePoints = emptyList()
                             isDrawingRoute = true

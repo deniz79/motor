@@ -299,7 +299,7 @@ fun RouteDrawingScreen(
 }
 
 // Yardımcı fonksiyonlar
-private fun calculateDistance(points: List<LatLng>): Double {
+fun calculateDistance(points: List<LatLng>): Double {
     if (points.size < 2) return 0.0
     var totalDistance = 0.0
     for (i in 0 until points.size - 1) {
@@ -308,7 +308,7 @@ private fun calculateDistance(points: List<LatLng>): Double {
     return totalDistance
 }
 
-private fun calculateDistanceBetweenPoints(point1: LatLng, point2: LatLng): Double {
+fun calculateDistanceBetweenPoints(point1: LatLng, point2: LatLng): Double {
     val R = 6371.0 // Dünya'nın yarıçapı (km)
     val lat1 = Math.toRadians(point1.latitude)
     val lat2 = Math.toRadians(point2.latitude)
@@ -321,4 +321,10 @@ private fun calculateDistanceBetweenPoints(point1: LatLng, point2: LatLng): Doub
     val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     
     return R * c
+}
+
+fun calculateDuration(points: List<LatLng>): Long {
+    val distance = calculateDistance(points)
+    val averageSpeed = 60.0 // km/h
+    return ((distance / averageSpeed) * 3600000).toLong() // milisaniye
 }

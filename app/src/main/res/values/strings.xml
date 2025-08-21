@@ -1,0 +1,129 @@
+<resources>
+    <string name="app_name">Motorlar</string>
+    
+    <!-- Navigation -->
+    <string name="home">Ana Sayfa</string>
+    <string name="map">Harita</string>
+    <string name="record">Kayıt</string>
+    <string name="team">Takım</string>
+    <string name="profile">Profil</string>
+    <string name="route_detail">Rota Detayı</string>
+    <string name="nav_home">Ana Sayfa</string>
+    <string name="nav_map">Harita</string>
+    <string name="nav_record">Kayıt</string>
+    <string name="nav_team">Takım</string>
+    <string name="nav_profile">Profil</string>
+    
+    <!-- Home Screen -->
+    <string name="search_routes">Rota ara...</string>
+    <string name="motorcycle_type">Motor Tipi</string>
+    <string name="difficulty_level">Zorluk Seviyesi</string>
+    <string name="all_types">Tümü</string>
+    <string name="all_difficulties">Tümü</string>
+    
+    <!-- Motorcycle Types -->
+    <string name="motorcycle_sport">Sport</string>
+    <string name="motorcycle_touring">Touring</string>
+    <string name="motorcycle_cruiser">Cruiser</string>
+    <string name="motorcycle_adventure">Adventure</string>
+    <string name="motorcycle_naked">Naked</string>
+    <string name="motorcycle_scooter">Scooter</string>
+    <string name="motorcycle_dual_sport">Dual Sport</string>
+    <string name="motorcycle_custom">Custom</string>
+    
+    <!-- Difficulty Levels -->
+    <string name="difficulty_easy">Kolay</string>
+    <string name="difficulty_medium">Orta</string>
+    <string name="difficulty_hard">Zor</string>
+    <string name="difficulty_expert">Uzman</string>
+    
+    <!-- Route Details -->
+    <string name="route_details">Rota Detayı</string>
+    <string name="route_statistics">Rota İstatistikleri</string>
+    <string name="route_information">Rota Bilgileri</string>
+    <string name="distance">Mesafe</string>
+    <string name="duration">Süre</string>
+    <string name="average_speed">Ortalama Hız</string>
+    <string name="max_speed">Maksimum Hız</string>
+    <string name="max_lean_angle">Maksimum Yatma Açısı</string>
+    <string name="difficulty">Zorluk</string>
+    <string name="start_location">Başlangıç</string>
+    <string name="end_location">Bitiş</string>
+    <string name="motorcycle_type_label">Motor Tipi</string>
+    <string name="created_by">Oluşturan</string>
+    <string name="download">İndir</string>
+    <string name="follow_route">Takip Et</string>
+    <string name="share">Paylaş</string>
+    <string name="favorite">Favori</string>
+    
+    <!-- Recording Screen -->
+    <string name="route_recording">Rota Kayıt</string>
+    <string name="recording_status">Kayıt Durumu</string>
+    <string name="recording_active">Kayıt Yapılıyor...</string>
+    <string name="recording_waiting">Kayıt Bekliyor</string>
+    <string name="speed">Hız</string>
+    <string name="sensor_data">Sensör Verileri</string>
+    <string name="lean_angle">Yatma Açısı</string>
+    <string name="acceleration">İvme</string>
+    <string name="start_recording">Kaydı Başlat</string>
+    <string name="stop_recording">Kaydı Durdur</string>
+    <string name="save_route">Kaydet</string>
+    <string name="share_route">Paylaş</string>
+    
+    <!-- Team Screen -->
+    <string name="active_teams">Aktif Takımlar</string>
+    <string name="search_teams">Takım Ara</string>
+    <string name="search_teams_hint">Takım ara...</string>
+    <string name="team_search_title">Takım Ara</string>
+    <string name="team_search_description">Katılmak istediğiniz takımları arayın ve başvurun.</string>
+    <string name="leader">Lider</string>
+    <string name="members">üye</string>
+    <string name="active">Aktif</string>
+    <string name="inactive">Pasif</string>
+    <string name="details">Detay</string>
+    <string name="join">Katıl</string>
+    <string name="new_team">Yeni Takım</string>
+    
+    <!-- Profile Screen -->
+    <string name="settings">Ayarlar</string>
+    <string name="statistics">İstatistikler</string>
+    <string name="total_distance">Toplam Mesafe</string>
+    <string name="total_routes">Toplam Rota</string>
+    <string name="rating">Puan</string>
+    <string name="my_routes">Rotalarım</string>
+    <string name="favorites">Favoriler</string>
+    <string name="my_teams">Takımlarım</string>
+    <string name="help">Yardım</string>
+    <string name="logout">Çıkış</string>
+    
+    <!-- Map Screen -->
+    <string name="map_view">Harita Görünümü</string>
+    <string name="map_description">Google Maps entegrasyonu ile rota görüntüleme ve takip özellikleri burada yer alacak.</string>
+    <string name="open_map">Haritayı Aç</string>
+    
+    <!-- Permissions -->
+    <string name="location_permission_title">Konum İzni Gerekli</string>
+    <string name="location_permission_message">Rota kaydetmek ve harita özelliklerini kullanmak için konum izni gereklidir.</string>
+    <string name="grant_permission">İzin Ver</string>
+    <string name="cancel">İptal</string>
+    
+    <!-- Errors -->
+    <string name="error_general">Bir hata oluştu</string>
+    <string name="error_network">Ağ bağlantısı hatası</string>
+    <string name="error_location">Konum alınamadı</string>
+    <string name="error_sensors">Sensör verileri alınamadı</string>
+    
+    <!-- Success -->
+    <string name="success_route_saved">Rota başarıyla kaydedildi</string>
+    <string name="success_route_shared">Rota başarıyla paylaşıldı</string>
+    <string name="success_team_joined">Takıma başarıyla katıldınız</string>
+    
+    <!-- Units -->
+    <string name="unit_km">km</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="unit_degrees">°</string>
+    <string name="unit_ms2">m/s²</string>
+    <string name="unit_hours">s</string>
+    <string name="unit_minutes">dk</string>
+    <string name="unit_seconds">sn</string>
+</resources>

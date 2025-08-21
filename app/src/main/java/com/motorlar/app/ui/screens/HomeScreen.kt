@@ -25,6 +25,8 @@ fun HomeScreen(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
+    val currentUser = viewModel.uiState.collectAsState().value.currentUser
+    
     var searchQuery by remember { mutableStateOf("") }
     var selectedMotorcycleType by remember { mutableStateOf<MotorcycleType?>(null) }
     var selectedDifficulty by remember { mutableStateOf<RouteDifficulty?>(null) }
@@ -357,7 +359,7 @@ fun HomeScreen(
                                 name = routeName,
                                 description = routeDescription,
                                 creatorId = 1,
-                                creatorName = viewModel.uiState.collectAsState().value.currentUser ?: "Kullanıcı",
+                                creatorName = currentUser ?: "Kullanıcı",
                                 motorcycleType = selectedMotorcycleType!!,
                                 startLocation = startLocation,
                                 endLocation = endLocation,

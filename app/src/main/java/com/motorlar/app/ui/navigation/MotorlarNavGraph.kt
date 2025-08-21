@@ -20,7 +20,8 @@ import com.motorlar.app.ui.screens.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MotorlarNavGraph(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    viewModel: MainViewModel
 ) {
     Scaffold(
         bottomBar = {
@@ -72,7 +73,8 @@ fun MotorlarNavGraph(
         ) {
             composable(Screen.Auth.route) {
                 AuthScreen(
-                    onLoginSuccess = {
+                    onLoginSuccess = { username ->
+                        viewModel.loginUser(username)
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Auth.route) { inclusive = true }
                         }
@@ -80,19 +82,19 @@ fun MotorlarNavGraph(
                 )
             }
             composable(Screen.Home.route) {
-                HomeScreen()
+                HomeScreen(viewModel = viewModel)
             }
             composable(Screen.Map.route) {
-                MapScreen()
+                MapScreen(viewModel = viewModel)
             }
             composable(Screen.Record.route) {
-                RecordScreen()
+                RecordScreen(viewModel = viewModel)
             }
             composable(Screen.Team.route) {
-                TeamScreen()
+                TeamScreen(viewModel = viewModel)
             }
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                ProfileScreen(viewModel = viewModel)
             }
             composable(Screen.RouteDetail.route + "/{routeId}") { backStackEntry ->
                 val routeId = backStackEntry.arguments?.getString("routeId") ?: ""

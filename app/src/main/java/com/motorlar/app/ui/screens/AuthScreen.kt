@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isLogin by remember { mutableStateOf(true) }
@@ -156,7 +156,7 @@ fun AuthScreen(
                     if (password == confirmPassword) {
                         // val request = RegisterRequest(username, email, password, fullName)
                         // TODO: Kayıt işlemi
-                        onLoginSuccess()
+                        onLoginSuccess(username)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -216,7 +216,7 @@ fun AuthScreen(
                     // Giriş işlemi
                     // val request = LoginRequest(email, password)
                     // TODO: Giriş işlemi
-                    onLoginSuccess()
+                    onLoginSuccess(email)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = email.isNotBlank() && password.isNotBlank()

@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
     var showEditProfileDialog by remember { mutableStateOf(false) }
@@ -35,11 +36,13 @@ fun ProfileScreen(
     var showAboutDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     
+    val currentUser = viewModel.uiState.collectAsState().value.currentUser
+    
     // Örnek kullanıcı bilgileri
     val userInfo = remember {
         UserProfile(
-            name = "Ahmet Yılmaz",
-            email = "ahmet@example.com",
+            name = currentUser ?: "Kullanıcı",
+            email = "${currentUser ?: "user"}@example.com",
             motorcycleType = "Sport",
             experienceLevel = "Orta",
             totalDistance = 1250.5f,
@@ -61,7 +64,10 @@ fun ProfileScreen(
             MenuItem("Gizlilik", Icons.Default.Security, "Gizlilik ayarları") { showPrivacySettingsDialog = true },
             MenuItem("Yardım", Icons.Default.Help, "Yardım ve destek") { showHelpDialog = true },
             MenuItem("Hakkında", Icons.Default.Info, "Uygulama bilgileri") { showAboutDialog = true },
-            MenuItem("Çıkış Yap", Icons.Default.Logout, "Hesaptan çıkış") { showLogoutDialog = true }
+            MenuItem("Çıkış Yap", Icons.Default.Logout, "Hesaptan çıkış") { 
+                viewModel.logoutUser()
+                showLogoutDialog = true 
+            }
         )
     }
     

@@ -3,38 +3,48 @@ package com.motorlar.app.viewmodel
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class MainUiState(
-    val hasLocationPermission: Boolean = false,
-    val isLocationEnabled: Boolean = false,
-    val isLoading: Boolean = false,
-    val error: String? = null
+    val isLoggedIn: Boolean = false,
+    val currentUser: String? = null,
+    val showLocationPermissionDialog: Boolean = false
 )
 
 class MainViewModel : ViewModel() {
     
     private val _uiState = MutableStateFlow(MainUiState())
-    val uiState: StateFlow<MainUiState> = _uiState
+    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+    
+    fun loginUser(username: String) {
+        _uiState.value = _uiState.value.copy(
+            isLoggedIn = true,
+            currentUser = username
+        )
+    }
+    
+    fun logoutUser() {
+        _uiState.value = _uiState.value.copy(
+            isLoggedIn = false,
+            currentUser = null
+        )
+    }
     
     fun onLocationPermissionGranted() {
-        _uiState.value = _uiState.value.copy(
-            hasLocationPermission = true,
-            isLocationEnabled = true
-        )
+        // İzin verildi
     }
     
     fun onLocationPermissionDenied() {
         _uiState.value = _uiState.value.copy(
-            hasLocationPermission = false,
-            isLocationEnabled = false
+            showLocationPermissionDialog = true
         )
     }
     
     fun onAppResume() {
-        // Location servisleri burada başlatılacak
+        // Uygulama ön plana geldi
     }
     
     fun onAppPause() {
-        // Location servisleri burada durdurulacak
+        // Uygulama arka plana gitti
     }
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordScreen(
+    viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
     var isRecording by remember { mutableStateOf(false) }

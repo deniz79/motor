@@ -21,6 +21,7 @@ import com.motorlar.app.data.model.RouteDifficulty
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -351,6 +352,19 @@ fun HomeScreen(
                     onClick = {
                         if (routeName.isNotBlank() && selectedMotorcycleType != null && selectedDifficulty != null) {
                             // Yeni rota ekleme işlemi
+                            val newRoute = Route(
+                                name = routeName,
+                                description = routeDescription,
+                                creatorId = 1,
+                                creatorName = viewModel.uiState.collectAsState().value.currentUser ?: "Kullanıcı",
+                                motorcycleType = selectedMotorcycleType!!,
+                                startLocation = startLocation,
+                                endLocation = endLocation,
+                                distance = 0.0,
+                                duration = 0L,
+                                difficulty = selectedDifficulty!!
+                            )
+                            // TODO: Rotayı listeye ekle
                             showNewRouteDialog = false
                         }
                     },

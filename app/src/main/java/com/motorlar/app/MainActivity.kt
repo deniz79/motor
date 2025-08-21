@@ -53,7 +53,8 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     
                     MotorlarNavGraph(
-                        navController = navController
+                        navController = navController,
+                        viewModel = viewModel
                     )
                 }
             }

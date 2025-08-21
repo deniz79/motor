@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
+    viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
     var mapView by remember { mutableStateOf<MapView?>(null) }
@@ -418,26 +419,72 @@ fun MapScreen(
     
     // Rota çizme dialog
     if (showRouteDrawingDialog) {
+        var routeName by remember { mutableStateOf("") }
+        var routeDescription by remember { mutableStateOf("") }
+        var isDrawingRoute by remember { mutableStateOf(false) }
+        var routePoints by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
+        
         AlertDialog(
             onDismissRequest = { showRouteDrawingDialog = false },
             title = { Text("Rota Çizme") },
             text = {
                 Column {
-                    Text("Haritada tıklayarak rota çizebilirsiniz")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("• Başlangıç noktasına tıklayın")
-                    Text("• Ara noktalara tıklayın")
-                    Text("• Bitiş noktasına çift tıklayın")
+                    if (!isDrawingRoute) {
+                        OutlinedTextField(
+                            value = routeName,
+                            onValueChange = { routeName = it },
+                            label = { Text("Rota Adı") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        OutlinedTextField(
+                            value = routeDescription,
+                            onValueChange = { routeDescription = it },
+                            label = { Text("Açıklama") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 2
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Text("Haritada tıklayarak rota çizebilirsiniz:")
+                        Text("• Başlangıç noktasına tıklayın")
+                        Text("• Ara noktalara tıklayın")
+                        Text("• Bitiş noktasına çift tıklayın")
+                    } else {
+                        Text("Rota çiziliyor...")
+                        Text("Tıklayın: ${routePoints.size} nokta")
+                        if (routePoints.isNotEmpty()) {
+                            Text("Son nokta: ${routePoints.last().first}, ${routePoints.last().second}")
+                        }
+                    }
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = { 
-                        // Rota çizme modunu başlat
-                        showRouteDrawingDialog = false 
+                if (!isDrawingRoute) {
+                    TextButton(
+                        onClick = { 
+                            if (routeName.isNotBlank()) {
+                                isDrawingRoute = true
+                                routePoints = listOf(Pair(41.0082, 28.9784)) // İstanbul başlangıç
+                            }
+                        },
+                        enabled = routeName.isNotBlank()
+                    ) {
+                        Text("Çizmeye Başla")
                     }
-                ) {
-                    Text("Başlat")
+                } else {
+                    TextButton(
+                        onClick = { 
+                            // Rota kaydetme işlemi
+                            showRouteDrawingDialog = false
+                            // TODO: Rotayı kaydet ve paylaş
+                        }
+                    ) {
+                        Text("Rotayı Kaydet")
+                    }
                 }
             },
             dismissButton = {

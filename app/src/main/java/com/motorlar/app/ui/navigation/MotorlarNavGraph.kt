@@ -33,24 +33,26 @@ fun MotorlarNavGraph(
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentDestination = navBackStackEntry?.destination
                     
-                    listOf(
-                        Screen.Home,
-                        Screen.Map,
-                        Screen.Record,
-                        Screen.Team,
-                        Screen.Profile
-                    ).forEach { screen ->
+                                               listOf(
+                               Screen.Home,
+                               Screen.Map,
+                               Screen.Record,
+                               Screen.Reels,
+                               Screen.Team,
+                               Screen.Profile
+                           ).forEach { screen ->
                         NavigationBarItem(
-                            icon = {
-                                Icon(
-                                    imageVector = when (screen) {
-                                        Screen.Home -> Icons.Default.Home
-                                        Screen.Map -> Icons.Default.Map
-                                        Screen.Record -> Icons.Default.RadioButtonChecked
-                                        Screen.Team -> Icons.Default.Group
-                                        Screen.Profile -> Icons.Default.Person
-                                        else -> Icons.Default.Home
-                                    },
+                                                               icon = {
+                                       Icon(
+                                           imageVector = when (screen) {
+                                               Screen.Home -> Icons.Default.Home
+                                               Screen.Map -> Icons.Default.Map
+                                               Screen.Record -> Icons.Default.RadioButtonChecked
+                                               Screen.Reels -> Icons.Default.PlayCircleOutline
+                                               Screen.Team -> Icons.Default.Group
+                                               Screen.Profile -> Icons.Default.Person
+                                               else -> Icons.Default.Home
+                                           },
                                     contentDescription = stringResource(screen.resourceId)
                                 )
                             },
@@ -103,9 +105,17 @@ fun MotorlarNavGraph(
             composable(Screen.Map.route) {
                 MapScreen(viewModel = viewModel)
             }
-            composable(Screen.Record.route) {
-                RecordScreen(viewModel = viewModel)
-            }
+                               composable(Screen.Record.route) {
+                       RecordScreen(viewModel = viewModel)
+                   }
+                   composable(Screen.Reels.route) {
+                       ReelsScreen(
+                           viewModel = viewModel,
+                           onNavigateToLocation = { location ->
+                               navController.navigate(Screen.RouteDetail.route + "/location_$location")
+                           }
+                       )
+                   }
             composable(Screen.Team.route) {
                 TeamScreen(viewModel = viewModel)
             }

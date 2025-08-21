@@ -20,6 +20,10 @@ fun RecordScreen(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
+    // Navigasyon başlatıldığında otomatik kayıt başlat
+    LaunchedEffect(Unit) {
+        // Bu ekran açıldığında otomatik kayıt başlat
+    }
     var isRecording by remember { mutableStateOf(false) }
     var isPaused by remember { mutableStateOf(false) }
     var recordingTime by remember { mutableStateOf(0L) }

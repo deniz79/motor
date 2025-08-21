@@ -28,7 +28,13 @@ fun RouteDetailScreen(
 ) {
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var isMapReady by remember { mutableStateOf(false) }
-    var currentLocation by remember { mutableStateOf(LatLng(41.0082, 28.9784)) } // İstanbul
+    var currentLocation by remember { mutableStateOf(LatLng(41.0082, 28.9784)) } // Varsayılan İstanbul
+    
+    // Gerçek konum alma (gerçek uygulamada GPS'ten alınacak)
+    LaunchedEffect(Unit) {
+        // Burada gerçek GPS konumu alınacak
+        // Şimdilik İstanbul'da kalıyor
+    }
     
     // Örnek rota verisi (gerçek uygulamada routeId ile alınacak)
     val route = remember {

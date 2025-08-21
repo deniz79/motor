@@ -33,7 +33,13 @@ fun MapScreen(
     
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var isMapReady by remember { mutableStateOf(false) }
-    var currentLocation by remember { mutableStateOf(LatLng(41.0082, 28.9784)) } // İstanbul
+    var currentLocation by remember { mutableStateOf(LatLng(41.0082, 28.9784)) } // Varsayılan İstanbul
+    
+    // Gerçek konum alma (gerçek uygulamada GPS'ten alınacak)
+    LaunchedEffect(Unit) {
+        // Burada gerçek GPS konumu alınacak
+        // Şimdilik İstanbul'da kalıyor
+    }
     var isDrawingRoute by remember { mutableStateOf(false) }
     var routePoints by remember { mutableStateOf<List<LatLng>>(emptyList()) }
     var currentRoute by remember { mutableStateOf<Route?>(null) }
@@ -338,32 +344,35 @@ fun MapScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    // Rota arama
-                    OutlinedButton(
-                        onClick = { showRouteSearchDialog = true }
-                    ) {
-                        Icon(Icons.Default.Search, "Ara")
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Rota Ara")
-                    }
-                    
-                    // Kayıtlı rotalar
-                    OutlinedButton(
-                        onClick = { showSavedRoutesDialog = true }
-                    ) {
-                        Icon(Icons.Default.Bookmark, "Kayıtlı")
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Kayıtlılar")
-                    }
-                    
-                    // Trafik
-                    OutlinedButton(
-                        onClick = { showTrafficDialog = true }
-                    ) {
-                        Icon(Icons.Default.Traffic, "Trafik")
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Trafik")
-                    }
+                                               // Rota arama
+                           OutlinedButton(
+                               onClick = { showRouteSearchDialog = true }
+                           ) {
+                               Icon(Icons.Default.Search, "Ara")
+                               Spacer(modifier = Modifier.width(4.dp))
+                               Text("Rota Ara")
+                           }
+
+                           // Kayıtlı rotalar
+                           OutlinedButton(
+                               onClick = { showSavedRoutesDialog = true }
+                           ) {
+                               Icon(Icons.Default.Bookmark, "Kayıtlı")
+                               Spacer(modifier = Modifier.width(4.dp))
+                               Text("Kayıtlılar")
+                           }
+
+                           // Navigasyon başlat
+                           OutlinedButton(
+                               onClick = { 
+                                   // Navigasyon başlat ve kayıt ekranına git
+                                   // Burada gerçek navigasyon başlatılacak
+                               }
+                           ) {
+                               Icon(Icons.Default.Navigation, "Navigasyon")
+                               Spacer(modifier = Modifier.width(4.dp))
+                               Text("Git")
+                           }
                 }
             }
         }

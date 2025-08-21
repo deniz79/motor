@@ -7,6 +7,7 @@ sealed class Screen(val route: String, val resourceId: Int) {
     object Home : Screen("home", R.string.home)
     object Map : Screen("map", R.string.map)
     object Record : Screen("record", R.string.record)
+    object Reels : Screen("reels", R.string.reels)
     object Team : Screen("team", R.string.team)
     object Profile : Screen("profile", R.string.profile)
     object RouteDetail : Screen("route_detail", R.string.route_detail)

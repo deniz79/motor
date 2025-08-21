@@ -52,53 +52,56 @@ fun HomeScreen(
     var showCreatePostDialog by remember { mutableStateOf(false) }
     var selectedRouteForAction by remember { mutableStateOf<Route?>(null) }
     
-    // Örnek rotalar (gerçek verilerle değiştirilecek)
-    val sampleRoutes = remember {
-        listOf(
-            Route(
-                name = "İstanbul - Sapanca Gölü",
-                description = "Güzel manzaralı rota, virajlı yollar",
-                creatorId = 1,
-                creatorName = "Ahmet",
-                motorcycleType = MotorcycleType.SPORT,
-                startLocation = "İstanbul",
-                endLocation = "Sapanca",
-                distance = 120.0,
-                duration = 7200000L,
-                difficulty = RouteDifficulty.MEDIUM,
-                rating = 4.5f,
-                reviewCount = 28
-            ),
-            Route(
-                name = "İstanbul - Bursa",
-                description = "Tarihi rota, düz yollar",
-                creatorId = 2,
-                creatorName = "Mehmet",
-                motorcycleType = MotorcycleType.TOURING,
-                startLocation = "İstanbul",
-                endLocation = "Bursa",
-                distance = 150.0,
-                duration = 9000000L,
-                difficulty = RouteDifficulty.EASY,
-                rating = 4.2f,
-                reviewCount = 15
-            ),
-            Route(
-                name = "İstanbul - İzmit",
-                description = "Sahil rotası, manzaralı",
-                creatorId = 3,
-                creatorName = "Ayşe",
-                motorcycleType = MotorcycleType.CRUISER,
-                startLocation = "İstanbul",
-                endLocation = "İzmit",
-                distance = 80.0,
-                duration = 5400000L,
-                difficulty = RouteDifficulty.EASY,
-                rating = 4.8f,
-                reviewCount = 32
-            )
-        )
-    }
+               // Örnek rotalar (gerçek verilerle değiştirilecek)
+           val sampleRoutes = remember {
+               listOf(
+                   Route(
+                       id = 1,
+                       name = "İstanbul - Sapanca Gölü",
+                       description = "Güzel manzaralı rota, virajlı yollar",
+                       creatorId = 1,
+                       creatorName = "Ahmet",
+                       motorcycleType = MotorcycleType.SPORT,
+                       startLocation = "İstanbul",
+                       endLocation = "Sapanca",
+                       distance = 120.0,
+                       duration = 7200000L,
+                       difficulty = RouteDifficulty.MEDIUM,
+                       rating = 4.5f,
+                       reviewCount = 28
+                   ),
+                   Route(
+                       id = 2,
+                       name = "İstanbul - Bursa",
+                       description = "Tarihi rota, düz yollar",
+                       creatorId = 2,
+                       creatorName = "Mehmet",
+                       motorcycleType = MotorcycleType.TOURING,
+                       startLocation = "İstanbul",
+                       endLocation = "Bursa",
+                       distance = 150.0,
+                       duration = 9000000L,
+                       difficulty = RouteDifficulty.EASY,
+                       rating = 4.2f,
+                       reviewCount = 15
+                   ),
+                   Route(
+                       id = 3,
+                       name = "İstanbul - İzmit",
+                       description = "Sahil rotası, manzaralı",
+                       creatorId = 3,
+                       creatorName = "Ayşe",
+                       motorcycleType = MotorcycleType.CRUISER,
+                       startLocation = "İstanbul",
+                       endLocation = "İzmit",
+                       distance = 80.0,
+                       duration = 5400000L,
+                       difficulty = RouteDifficulty.EASY,
+                       rating = 4.8f,
+                       reviewCount = 32
+                   )
+               )
+           }
     
     Column(
         modifier = modifier.fillMaxSize()
@@ -215,46 +218,7 @@ fun HomeScreen(
                 )
             }
             
-            // Reels/Post bölümü
-            item {
-                Text(
-                    text = "Motorcuların Paylaşımları",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-            }
             
-            // Örnek postlar
-            items(3) { index ->
-                PostCard(
-                    postId = index + 1,
-                    username = "Motorcu${index + 1}",
-                    location = when(index) {
-                        0 -> "Sapanca Gölü, Sakarya"
-                        1 -> "Abant Gölü, Bolu"
-                        else -> "Çeşme Sahili, İzmir"
-                    },
-                    description = when(index) {
-                        0 -> "Harika bir gün! Sapanca'da muhteşem manzara 🏍️"
-                        1 -> "Abant'ta virajların keyfini çıkardık ✨"
-                        else -> "Çeşme'de güneş batımı 🌅"
-                    },
-                    onLocationClick = { location ->
-                        // Haritada konumu göster - RouteDetail ekranına yönlendir
-                        onNavigateToRouteDetail("location_$index")
-                    },
-                    onLikeClick = { 
-                        // Beğeni işlemi
-                    },
-                    onCommentClick = { 
-                        // Yorum dialog'u aç
-                    },
-                    onShareClick = { 
-                        // Paylaş dialog'u aç
-                    }
-                )
-            }
         }
     }
     
@@ -896,122 +860,3 @@ fun RouteCard(
     }
 }
 
-@Composable
-fun PostCard(
-    postId: Int,
-    username: String,
-    location: String,
-    description: String,
-    onLocationClick: (String) -> Unit,
-    onLikeClick: () -> Unit,
-    onCommentClick: () -> Unit,
-    onShareClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Fotoğraf/Video placeholder
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Image,
-                    contentDescription = "Fotoğraf/Video",
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            // Üst bilgiler
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
-                    Text(
-                        text = username,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Text(
-                        text = location,
-                        fontSize = 12.sp,
-                        color = Color.White,
-                        modifier = Modifier.clickable { onLocationClick(location) }
-                    )
-                }
-                
-                Icon(
-                    Icons.Default.MoreVert,
-                    contentDescription = "Daha fazla",
-                    tint = Color.White
-                )
-            }
-            
-            // Alt bilgiler
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(12.dp)
-            ) {
-                Text(
-                    text = description,
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    IconButton(
-                        onClick = onLikeClick,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.FavoriteBorder,
-                            contentDescription = "Beğen",
-                            tint = Color.White
-                        )
-                    }
-                    
-                    IconButton(
-                        onClick = onCommentClick,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Comment,
-                            contentDescription = "Yorum",
-                            tint = Color.White
-                        )
-                    }
-                    
-                    IconButton(
-                        onClick = onShareClick,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Share,
-                            contentDescription = "Paylaş",
-                            tint = Color.White
-                        )
-                    }
-                }
-            }
-        }
-    }
-}

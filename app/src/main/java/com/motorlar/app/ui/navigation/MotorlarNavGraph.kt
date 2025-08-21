@@ -24,45 +24,49 @@ fun MotorlarNavGraph(
     navController: NavHostController = rememberNavController(),
     viewModel: MainViewModel
 ) {
+    val isLoggedIn = viewModel.uiState.collectAsState().value.isLoggedIn
+    
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                
-                listOf(
-                    Screen.Home,
-                    Screen.Map,
-                    Screen.Record,
-                    Screen.Team,
-                    Screen.Profile
-                ).forEach { screen ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = when (screen) {
-                                    Screen.Home -> Icons.Default.Home
-                                    Screen.Map -> Icons.Default.Map
-                                    Screen.Record -> Icons.Default.RadioButtonChecked
-                                    Screen.Team -> Icons.Default.Group
-                                    Screen.Profile -> Icons.Default.Person
-                                    else -> Icons.Default.Home
-                                },
-                                contentDescription = stringResource(screen.resourceId)
-                            )
-                        },
-                        label = { Text(stringResource(screen.resourceId)) },
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (isLoggedIn) {
+                NavigationBar {
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentDestination = navBackStackEntry?.destination
+                    
+                    listOf(
+                        Screen.Home,
+                        Screen.Map,
+                        Screen.Record,
+                        Screen.Team,
+                        Screen.Profile
+                    ).forEach { screen ->
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    imageVector = when (screen) {
+                                        Screen.Home -> Icons.Default.Home
+                                        Screen.Map -> Icons.Default.Map
+                                        Screen.Record -> Icons.Default.RadioButtonChecked
+                                        Screen.Team -> Icons.Default.Group
+                                        Screen.Profile -> Icons.Default.Person
+                                        else -> Icons.Default.Home
+                                    },
+                                    contentDescription = stringResource(screen.resourceId)
+                                )
+                            },
+                            label = { Text(stringResource(screen.resourceId)) },
+                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                            onClick = {
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }

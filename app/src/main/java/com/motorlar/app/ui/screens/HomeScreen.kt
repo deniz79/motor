@@ -1,21 +1,24 @@
 package com.motorlar.app.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.motorlar.app.data.model.Route
 import com.motorlar.app.viewmodel.MainViewModel
+import com.motorlar.app.data.model.Route
 import com.motorlar.app.data.model.MotorcycleType
 import com.motorlar.app.data.model.RouteDifficulty
 
@@ -35,61 +38,61 @@ fun HomeScreen(
     var showMotorcycleTypeDialog by remember { mutableStateOf(false) }
     var showDifficultyDialog by remember { mutableStateOf(false) }
     var showNewRouteDialog by remember { mutableStateOf(false) }
+    var showRouteDrawingDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showNotificationsDialog by remember { mutableStateOf(false) }
     var showRouteDetailDialog by remember { mutableStateOf<Route?>(null) }
     var showDownloadDialog by remember { mutableStateOf(false) }
     var showCommentDialog by remember { mutableStateOf(false) }
     var showShareDialog by remember { mutableStateOf(false) }
+    var showReelsDialog by remember { mutableStateOf(false) }
+    var showCreatePostDialog by remember { mutableStateOf(false) }
     var selectedRouteForAction by remember { mutableStateOf<Route?>(null) }
     
-    // Örnek rotalar
+    // Örnek rotalar (gerçek verilerle değiştirilecek)
     val sampleRoutes = remember {
         listOf(
             Route(
-                id = 1,
                 name = "İstanbul - Sapanca Gölü",
-                description = "Şehir dışına çıkıp doğayla buluşun",
-                distance = 120.5,
-                duration = 180,
-                difficulty = RouteDifficulty.MEDIUM,
-                motorcycleType = MotorcycleType.TOURING,
-                rating = 4.5f,
-                reviewCount = 23,
-                isPublic = true,
+                description = "Güzel manzaralı rota, virajlı yollar",
                 creatorId = 1,
-                createdAt = System.currentTimeMillis(),
-                waypoints = emptyList()
+                creatorName = "Ahmet",
+                motorcycleType = MotorcycleType.SPORT,
+                startLocation = "İstanbul",
+                endLocation = "Sapanca",
+                distance = 120.0,
+                duration = 7200000L,
+                difficulty = RouteDifficulty.MEDIUM,
+                rating = 4.5f,
+                reviewCount = 28
             ),
             Route(
-                id = 2,
-                name = "Bolu - Abant Gölü",
-                description = "Muhteşem manzaralı dağ yolu",
-                distance = 85.2,
-                duration = 120,
-                difficulty = RouteDifficulty.EASY,
-                motorcycleType = MotorcycleType.ADVENTURE,
-                rating = 4.8f,
-                reviewCount = 45,
-                isPublic = true,
+                name = "İstanbul - Bursa",
+                description = "Tarihi rota, düz yollar",
                 creatorId = 2,
-                createdAt = System.currentTimeMillis(),
-                waypoints = emptyList()
+                creatorName = "Mehmet",
+                motorcycleType = MotorcycleType.TOURING,
+                startLocation = "İstanbul",
+                endLocation = "Bursa",
+                distance = 150.0,
+                duration = 9000000L,
+                difficulty = RouteDifficulty.EASY,
+                rating = 4.2f,
+                reviewCount = 15
             ),
             Route(
-                id = 3,
-                name = "İzmir - Çeşme Sahil",
-                description = "Ege'nin maviliğinde keyifli sürüş",
-                distance = 95.0,
-                duration = 90,
-                difficulty = RouteDifficulty.EASY,
-                motorcycleType = MotorcycleType.CRUISER,
-                rating = 4.2f,
-                reviewCount = 18,
-                isPublic = true,
+                name = "İstanbul - İzmit",
+                description = "Sahil rotası, manzaralı",
                 creatorId = 3,
-                createdAt = System.currentTimeMillis(),
-                waypoints = emptyList()
+                creatorName = "Ayşe",
+                motorcycleType = MotorcycleType.CRUISER,
+                startLocation = "İstanbul",
+                endLocation = "İzmit",
+                distance = 80.0,
+                duration = 5400000L,
+                difficulty = RouteDifficulty.EASY,
+                rating = 4.8f,
+                reviewCount = 32
             )
         )
     }
@@ -120,16 +123,10 @@ fun HomeScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Rota ara...") },
+                    label = { Text("Rota ara...") },
                     leadingIcon = { Icon(Icons.Default.Search, "Ara") },
-                    trailingIcon = { 
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Clear, "Temizle")
-                            }
-                        }
-                    }
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
             }
             
@@ -139,29 +136,23 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Motor tipi filtresi
                     FilterChip(
                         selected = selectedMotorcycleType != null,
                         onClick = { showMotorcycleTypeDialog = true },
-                        label = { Text(selectedMotorcycleType?.name ?: "Motor Tipi") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Motorcycle, "Motor")
-                        }
+                        label = { Text(selectedMotorcycleType?.displayName ?: "Motor Tipi") },
+                        leadingIcon = { Icon(Icons.Default.Motorcycle, "Motor") }
                     )
                     
-                    // Zorluk filtresi
                     FilterChip(
                         selected = selectedDifficulty != null,
                         onClick = { showDifficultyDialog = true },
                         label = { Text(selectedDifficulty?.name ?: "Zorluk") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Star, "Zorluk")
-                        }
+                        leadingIcon = { Icon(Icons.Default.Star, "Zorluk") }
                     )
                 }
             }
             
-            // Yeni rota ekleme butonu
+            // Yeni rota ekle butonu
             item {
                 Button(
                     onClick = { showNewRouteDialog = true },
@@ -176,35 +167,82 @@ fun HomeScreen(
                 }
             }
             
-            // Popüler rotalar başlığı
+            // Reels/Post paylaş butonu
+            item {
+                Button(
+                    onClick = { showCreatePostDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Icon(Icons.Default.CameraAlt, "Kamera")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Fotoğraf/Video Paylaş")
+                }
+            }
+            
+            // Popüler Rotalar başlığı
             item {
                 Text(
                     text = "Popüler Rotalar",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
             
-            // Rota listesi
+            // Rota kartları
             items(sampleRoutes) { route ->
                 RouteCard(
                     route = route,
                     onRouteClick = { showRouteDetailDialog = route },
-                    onDownload = { 
-                        // İndirme işlemi
+                    onDownload = {
                         showDownloadDialog = true
                         selectedRouteForAction = route
                     },
-                    onComment = { 
-                        // Yorum işlemi
+                    onComment = {
                         showCommentDialog = true
                         selectedRouteForAction = route
                     },
-                    onShare = { 
-                        // Paylaşım işlemi
+                    onShare = {
                         showShareDialog = true
                         selectedRouteForAction = route
                     }
+                )
+            }
+            
+            // Reels/Post bölümü
+            item {
+                Text(
+                    text = "Motorcuların Paylaşımları",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            
+            // Örnek postlar
+            items(3) { index ->
+                PostCard(
+                    postId = index + 1,
+                    username = "Motorcu${index + 1}",
+                    location = when(index) {
+                        0 -> "Sapanca Gölü, Sakarya"
+                        1 -> "Abant Gölü, Bolu"
+                        else -> "Çeşme Sahili, İzmir"
+                    },
+                    description = when(index) {
+                        0 -> "Harika bir gün! Sapanca'da muhteşem manzara 🏍️"
+                        1 -> "Abant'ta virajların keyfini çıkardık ✨"
+                        else -> "Çeşme'de güneş batımı 🌅"
+                    },
+                    onLocationClick = { location ->
+                        // Haritada konumu göster
+                    },
+                    onLikeClick = { /* Beğen */ },
+                    onCommentClick = { /* Yorum */ },
+                    onShareClick = { /* Paylaş */ }
                 )
             }
         }
@@ -214,7 +252,7 @@ fun HomeScreen(
     if (showMotorcycleTypeDialog) {
         AlertDialog(
             onDismissRequest = { showMotorcycleTypeDialog = false },
-            title = { Text("Motor Tipi Seçin") },
+            title = { Text("Motor Tipi Seç") },
             text = {
                 Column {
                     MotorcycleType.values().forEach { type ->
@@ -225,7 +263,7 @@ fun HomeScreen(
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(type.name)
+                            Text(type.displayName)
                         }
                     }
                 }
@@ -238,11 +276,11 @@ fun HomeScreen(
         )
     }
     
-    // Zorluk seviyesi seçim dialog
+    // Zorluk seçim dialog
     if (showDifficultyDialog) {
         AlertDialog(
             onDismissRequest = { showDifficultyDialog = false },
-            title = { Text("Zorluk Seviyesi Seçin") },
+            title = { Text("Zorluk Seviyesi Seç") },
             text = {
                 Column {
                     RouteDifficulty.values().forEach { difficulty ->
@@ -266,86 +304,366 @@ fun HomeScreen(
         )
     }
     
-    // Yeni rota ekleme dialog
+    // Yeni rota ekleme dialog (harita çizme ile)
     if (showNewRouteDialog) {
-        var routeName by remember { mutableStateOf("") }
-        var routeDescription by remember { mutableStateOf("") }
-        var selectedMotorcycleType by remember { mutableStateOf<MotorcycleType?>(null) }
-        var selectedDifficulty by remember { mutableStateOf<RouteDifficulty?>(null) }
-        var startLocation by remember { mutableStateOf("") }
-        var endLocation by remember { mutableStateOf("") }
-        
         AlertDialog(
             onDismissRequest = { showNewRouteDialog = false },
-            title = { Text("Yeni Rota Ekle") },
+            title = { Text("Yeni Rota Oluştur") },
             text = {
-                Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState())
-                ) {
+                Column {
+                    Text("Rota oluşturma seçenekleri:")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Button(
+                        onClick = {
+                            showNewRouteDialog = false
+                            showRouteDrawingDialog = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Timeline, "Çiz")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Haritada Rota Çiz")
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Button(
+                        onClick = {
+                            showNewRouteDialog = false
+                            // GPS ile rota kaydetme
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.GpsFixed, "GPS")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("GPS ile Rota Kaydet")
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Button(
+                        onClick = {
+                            showNewRouteDialog = false
+                            // Manuel rota oluşturma
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Edit, "Manuel")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Manuel Rota Oluştur")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showNewRouteDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Rota çizme dialog
+    if (showRouteDrawingDialog) {
+        var routeName by remember { mutableStateOf("") }
+        var routeDescription by remember { mutableStateOf("") }
+        
+        AlertDialog(
+            onDismissRequest = { showRouteDrawingDialog = false },
+            title = { Text("Rota Çizme") },
+            text = {
+                Column {
                     OutlinedTextField(
                         value = routeName,
                         onValueChange = { routeName = it },
                         label = { Text("Rota Adı") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
                     Spacer(modifier = Modifier.height(8.dp))
-                    
                     OutlinedTextField(
                         value = routeDescription,
                         onValueChange = { routeDescription = it },
                         label = { Text("Açıklama") },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 2
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    OutlinedTextField(
-                        value = startLocation,
-                        onValueChange = { startLocation = it },
-                        label = { Text("Başlangıç Noktası") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    OutlinedTextField(
-                        value = endLocation,
-                        onValueChange = { endLocation = it },
-                        label = { Text("Bitiş Noktası") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Text("Motor Tipi:", fontWeight = FontWeight.Bold)
-                    MotorcycleType.values().forEach { type ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = selectedMotorcycleType == type,
-                                onClick = { selectedMotorcycleType = type }
-                            )
-                            Text(type.name)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Haritada rota çizmek için:")
+                    Text("• Harita ekranına gidin")
+                    Text("• 'Rota Çiz' butonuna basın")
+                    Text("• Haritada tıklayarak rota oluşturun")
+                    Text("• Çizimi bitirmek için tekrar butona basın")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (routeName.isNotBlank()) {
+                            showRouteDrawingDialog = false
+                            // Harita ekranına yönlendir
                         }
+                    },
+                    enabled = routeName.isNotBlank()
+                ) {
+                    Text("Haritaya Git")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRouteDrawingDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Fotoğraf/Video paylaş dialog
+    if (showCreatePostDialog) {
+        var postDescription by remember { mutableStateOf("") }
+        var postLocation by remember { mutableStateOf("") }
+        var showLocationRequired by remember { mutableStateOf(false) }
+        
+        AlertDialog(
+            onDismissRequest = { showCreatePostDialog = false },
+            title = { Text("Fotoğraf/Video Paylaş") },
+            text = {
+                Column {
+                    Text("Fotoğraf veya video seçin:")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Button(
+                        onClick = { /* Kamera/galeri aç */ },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.CameraAlt, "Kamera")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Fotoğraf/Video Seç")
                     }
                     
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    OutlinedTextField(
+                        value = postDescription,
+                        onValueChange = { postDescription = it },
+                        label = { Text("Açıklama") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3
+                    )
+                    
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    Text("Zorluk:", fontWeight = FontWeight.Bold)
-                    RouteDifficulty.values().forEach { difficulty ->
-                        Row(
+                    OutlinedTextField(
+                        value = postLocation,
+                        onValueChange = { postLocation = it },
+                        label = { Text("Konum (Zorunlu)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = showLocationRequired && postLocation.isBlank()
+                    )
+                    
+                    if (showLocationRequired && postLocation.isBlank()) {
+                        Text(
+                            text = "Konum bilgisi zorunludur!",
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (postLocation.isNotBlank()) {
+                            // Post paylaş
+                            showCreatePostDialog = false
+                        } else {
+                            showLocationRequired = true
+                        }
+                    }
+                ) {
+                    Text("Paylaş")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCreatePostDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Yol tarifi dialog
+    if (showDownloadDialog) {
+        AlertDialog(
+            onDismissRequest = { showDownloadDialog = false },
+            title = { Text("Yol Tarifi Al") },
+            text = {
+                Column {
+                    selectedRouteForAction?.let { route ->
+                        Text("${route.name} rotasına gitmek istiyor musunuz?")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Başlangıç: ${route.startLocation}")
+                        Text("Bitiş: ${route.endLocation}")
+                        Text("Mesafe: ${route.distance} km")
+                        Text("Tahmini süre: ${route.duration / 60000} dakika")
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Yol tarifi:")
+                        Text("1. ${route.startLocation} merkezinden çıkın")
+                        Text("2. D100 karayoluna girin")
+                        Text("3. ${route.endLocation} yönünde devam edin")
+                        Text("4. ${route.endLocation} merkezine ulaşın")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDownloadDialog = false
+                        selectedRouteForAction = null
+                        // Harita ekranına yönlendir ve rotayı göster
+                    }
+                ) {
+                    Text("Haritada Göster")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDownloadDialog = false
+                        selectedRouteForAction = null
+                    }
+                ) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Yorum dialog
+    if (showCommentDialog) {
+        var commentText by remember { mutableStateOf("") }
+        
+        AlertDialog(
+            onDismissRequest = { showCommentDialog = false },
+            title = { Text("Yorum Yap") },
+            text = {
+                Column {
+                    selectedRouteForAction?.let { route ->
+                        Text("${route.name} rotası için yorumunuz:")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = commentText,
+                            onValueChange = { commentText = it },
+                            label = { Text("Yorumunuz") },
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                            minLines = 3
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showCommentDialog = false
+                        selectedRouteForAction = null
+                        commentText = ""
+                    }
+                ) {
+                    Text("Gönder")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showCommentDialog = false
+                        selectedRouteForAction = null
+                        commentText = ""
+                    }
+                ) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Paylaş dialog
+    if (showShareDialog) {
+        AlertDialog(
+            onDismissRequest = { showShareDialog = false },
+            title = { Text("Rota Paylaş") },
+            text = {
+                Column {
+                    selectedRouteForAction?.let { route ->
+                        Text("${route.name} rotasını paylaşmak istiyor musunuz?")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Bu rota sosyal medyada paylaşılacak.")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showShareDialog = false
+                        selectedRouteForAction = null
+                    }
+                ) {
+                    Text("Paylaş")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showShareDialog = false
+                        selectedRouteForAction = null
+                    }
+                ) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+    
+    // Rota detay dialog
+    showRouteDetailDialog?.let { route ->
+        AlertDialog(
+            onDismissRequest = { showRouteDetailDialog = null },
+            title = { Text(route.name) },
+            text = {
+                Column {
+                    Text(route.description)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Oluşturan: ${route.creatorName}")
+                    Text("Mesafe: ${route.distance} km")
+                    Text("Süre: ${route.duration / 60000} dakika")
+                    Text("Zorluk: ${route.difficulty.name}")
+                    Text("Motor Tipi: ${route.motorcycleType.displayName}")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Yorumlar bölümü
+                    Text("Yorumlar:", fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Örnek yorumlar
+                    listOf(
+                        "Harika bir rota! Virajlar çok keyifli.",
+                        "Manzara muhteşem, kesinlikle tavsiye ederim.",
+                        "Yol durumu iyi, rahat sürüş."
+                    ).forEach { comment ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
                         ) {
-                            RadioButton(
-                                selected = selectedDifficulty == difficulty,
-                                onClick = { selectedDifficulty = difficulty }
-                            )
-                            Text(difficulty.name)
+                            Column(
+                                modifier = Modifier.padding(12.dp)
+                            ) {
+                                Text(
+                                    text = comment,
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    text = "Kullanıcı • 2 saat önce",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }
@@ -353,32 +671,16 @@ fun HomeScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (routeName.isNotBlank() && selectedMotorcycleType != null && selectedDifficulty != null) {
-                            // Yeni rota ekleme işlemi
-                            val newRoute = Route(
-                                name = routeName,
-                                description = routeDescription,
-                                creatorId = 1,
-                                creatorName = currentUser ?: "Kullanıcı",
-                                motorcycleType = selectedMotorcycleType!!,
-                                startLocation = startLocation,
-                                endLocation = endLocation,
-                                distance = 0.0,
-                                duration = 0L,
-                                difficulty = selectedDifficulty!!
-                            )
-                            // TODO: Rotayı listeye ekle
-                            showNewRouteDialog = false
-                        }
-                    },
-                    enabled = routeName.isNotBlank() && selectedMotorcycleType != null && selectedDifficulty != null
+                        showRouteDetailDialog = null
+                        // Haritada rotayı göster
+                    }
                 ) {
-                    Text("Ekle")
+                    Text("Haritada Göster")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showNewRouteDialog = false }) {
-                    Text("İptal")
+                TextButton(onClick = { showRouteDetailDialog = null }) {
+                    Text("Kapat")
                 }
             }
         )
@@ -444,161 +746,8 @@ fun HomeScreen(
             }
         )
     }
-    
-    // Rota detay dialog
-    showRouteDetailDialog?.let { route ->
-        AlertDialog(
-            onDismissRequest = { showRouteDetailDialog = null },
-            title = { Text(route.name) },
-            text = {
-                Column {
-                    Text(route.description)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Mesafe: ${route.distance} km")
-                    Text("Süre: ${route.duration} dk")
-                    Text("Zorluk: ${route.difficulty.name}")
-                    Text("Motor Tipi: ${route.motorcycleType.name}")
-                    Text("Puan: ${route.rating} (${route.reviewCount} yorum)")
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showRouteDetailDialog = null }) {
-                    Text("Kapat")
-                }
-            }
-        )
-    }
-    
-    // İndirme dialog
-    if (showDownloadDialog) {
-        AlertDialog(
-            onDismissRequest = { showDownloadDialog = false },
-            title = { Text("Yol Tarifi Al") },
-            text = {
-                Column {
-                    selectedRouteForAction?.let { route ->
-                        Text("${route.name} rotasına gitmek istiyor musunuz?")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Mesafe: ${route.distance} km")
-                        Text("Süre: ${route.duration} dk")
-                        Text("Zorluk: ${route.difficulty.name}")
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // İndirme işlemi
-                        showDownloadDialog = false
-                        selectedRouteForAction = null
-                    }
-                ) {
-                    Text("Git")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDownloadDialog = false
-                        selectedRouteForAction = null
-                    }
-                ) {
-                    Text("İptal")
-                }
-            }
-        )
-    }
-    
-    // Yorum dialog
-    if (showCommentDialog) {
-        var commentText by remember { mutableStateOf("") }
-        
-        AlertDialog(
-            onDismissRequest = { showCommentDialog = false },
-            title = { Text("Yorum Yap") },
-            text = {
-                Column {
-                    selectedRouteForAction?.let { route ->
-                        Text("${route.name} rotası için yorumunuz:")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = commentText,
-                            onValueChange = { commentText = it },
-                            label = { Text("Yorumunuz") },
-                            modifier = Modifier.fillMaxWidth(),
-                            minLines = 3
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // Yorum gönderme işlemi
-                        showCommentDialog = false
-                        selectedRouteForAction = null
-                        commentText = ""
-                    }
-                ) {
-                    Text("Gönder")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showCommentDialog = false
-                        selectedRouteForAction = null
-                        commentText = ""
-                    }
-                ) {
-                    Text("İptal")
-                }
-            }
-        )
-    }
-    
-    // Paylaş dialog
-    if (showShareDialog) {
-        AlertDialog(
-            onDismissRequest = { showShareDialog = false },
-            title = { Text("Rota Paylaş") },
-            text = {
-                Column {
-                    selectedRouteForAction?.let { route ->
-                        Text("${route.name} rotasını paylaşmak istiyor musunuz?")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Mesafe: ${route.distance} km")
-                        Text("Süre: ${route.duration} dk")
-                        Text("Zorluk: ${route.difficulty.name}")
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // Paylaşım işlemi
-                        showShareDialog = false
-                        selectedRouteForAction = null
-                    }
-                ) {
-                    Text("Paylaş")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showShareDialog = false
-                        selectedRouteForAction = null
-                    }
-                ) {
-                    Text("İptal")
-                }
-            }
-        )
-    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RouteCard(
     route: Route,
@@ -608,14 +757,15 @@ fun RouteCard(
     onShare: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        onClick = onRouteClick
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onRouteClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Rota başlığı ve rating
+            // Başlık ve yıldız
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -626,12 +776,13 @@ fun RouteCard(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
+                
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Star,
                         contentDescription = "Yıldız",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
+                        tint = Color(0xFFFFD700),
+                        modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -676,7 +827,7 @@ fun RouteCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("${route.duration} dk")
+                    Text("${route.duration / 60000} dk")
                 }
                 
                 // Zorluk
@@ -727,6 +878,126 @@ fun RouteCard(
                     Icon(Icons.Default.Share, "Paylaş")
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Paylaş")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PostCard(
+    postId: Int,
+    username: String,
+    location: String,
+    description: String,
+    onLocationClick: (String) -> Unit,
+    onLikeClick: () -> Unit,
+    onCommentClick: () -> Unit,
+    onShareClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Fotoğraf/Video placeholder
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Image,
+                    contentDescription = "Fotoğraf/Video",
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            // Üst bilgiler
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column {
+                    Text(
+                        text = username,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = location,
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        modifier = Modifier.clickable { onLocationClick(location) }
+                    )
+                }
+                
+                Icon(
+                    Icons.Default.MoreVert,
+                    contentDescription = "Daha fazla",
+                    tint = Color.White
+                )
+            }
+            
+            // Alt bilgiler
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = description,
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    IconButton(
+                        onClick = onLikeClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.FavoriteBorder,
+                            contentDescription = "Beğen",
+                            tint = Color.White
+                        )
+                    }
+                    
+                    IconButton(
+                        onClick = onCommentClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Comment,
+                            contentDescription = "Yorum",
+                            tint = Color.White
+                        )
+                    }
+                    
+                    IconButton(
+                        onClick = onShareClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Share,
+                            contentDescription = "Paylaş",
+                            tint = Color.White
+                        )
+                    }
                 }
             }
         }

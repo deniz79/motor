@@ -1,15 +1,11 @@
 package com.motorlar.app.data.model
 
 import android.os.Parcelable
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
 @Parcelize
-@Entity(tableName = "routes")
 data class Route(
-    @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val name: String,
     val description: String,

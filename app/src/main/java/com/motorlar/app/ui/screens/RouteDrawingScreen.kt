@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.motorlar.app.viewmodel.MainViewModel
+import com.motorlar.app.data.model.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,15 +48,29 @@ fun RouteDrawingScreen(
             },
             actions = {
                 if (isDrawingRoute) {
-                    TextButton(
-                        onClick = {
-                            isDrawingRoute = false
-                            // Rotayı kaydet
-                            onRouteSaved()
+                                            TextButton(
+                            onClick = {
+                                isDrawingRoute = false
+                                // Rotayı kaydet ve harita ekranına ekle
+                                val newRoute = Route(
+                                    id = System.currentTimeMillis().toInt(),
+                                    name = routeName,
+                                    description = routeDescription,
+                                    creatorId = 1,
+                                    creatorName = "Siz",
+                                    motorcycleType = com.motorlar.app.data.model.MotorcycleType.SPORT,
+                                    startLocation = "Başlangıç",
+                                    endLocation = "Bitiş",
+                                    distance = calculateDistance(routePoints),
+                                    duration = calculateDuration(routePoints),
+                                    difficulty = com.motorlar.app.data.model.RouteDifficulty.EASY
+                                )
+                                // Burada rotayı harita ekranına eklenebilir
+                                onRouteSaved()
+                            }
+                        ) {
+                            Text("Kaydet", fontWeight = FontWeight.Bold)
                         }
-                    ) {
-                        Text("Kaydet", fontWeight = FontWeight.Bold)
-                    }
                 }
             }
         )
@@ -117,7 +132,7 @@ fun RouteDrawingScreen(
                             if (isDrawingRoute) {
                                 routePoints = routePoints + latLng
                                 
-                                // Durak noktası marker'ı ekle (farklı renkte)
+                                // Yeni durak noktası marker'ı ekle
                                 googleMap.addMarker(
                                     MarkerOptions()
                                         .position(latLng)
@@ -125,30 +140,16 @@ fun RouteDrawingScreen(
                                         .snippet("${latLng.latitude}, ${latLng.longitude}")
                                 )
                                 
-                                // Durak noktalarını birleştiren rota çizgisini güncelle
+                                // Rota çizgisini güncelle (Google Maps benzeri)
                                 if (routePoints.size > 1) {
-                                    // Önceki çizgileri temizle
-                                    googleMap.clear()
-                                    
-                                    // Tüm durak noktalarını yeniden çiz
-                                    routePoints.forEachIndexed { index, point ->
-                                        googleMap.addMarker(
-                                            MarkerOptions()
-                                                .position(point)
-                                                .title("Durak ${index + 1}")
-                                                .snippet("${point.latitude}, ${point.longitude}")
-                                        )
-                                        
-                                        // Durak noktalarını birleştiren çizgi
-                                        if (index > 0) {
-                                            googleMap.addPolyline(
-                                                PolylineOptions()
-                                                    .add(routePoints[index - 1], point)
-                                                    .width(8f)
-                                                    .color(0xFF2196F3.toInt())
-                                            )
-                                        }
-                                    }
+                                    // Sadece son iki nokta arasına çizgi ekle
+                                    val previousPoint = routePoints[routePoints.size - 2]
+                                    googleMap.addPolyline(
+                                        PolylineOptions()
+                                            .add(previousPoint, latLng)
+                                            .width(8f)
+                                            .color(0xFF2196F3.toInt())
+                                    )
                                 }
                             }
                         }

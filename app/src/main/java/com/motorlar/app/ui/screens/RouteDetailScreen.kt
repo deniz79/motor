@@ -1,6 +1,8 @@
 package com.motorlar.app.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -36,6 +38,11 @@ fun RouteDetailScreen(
         // Şimdilik İstanbul'da kalıyor
     }
     
+    // Navigasyon durumu
+    var isNavigationActive by remember { mutableStateOf(false) }
+    var currentStep by remember { mutableStateOf(0) }
+    var showNavigationDialog by remember { mutableStateOf(false) }
+    
     // Örnek rota verisi (gerçek uygulamada routeId ile alınacak)
     val route = remember {
         Route(
@@ -51,6 +58,54 @@ fun RouteDetailScreen(
             difficulty = com.motorlar.app.data.model.RouteDifficulty.MEDIUM,
             rating = 4.5f,
             reviewCount = 28
+        )
+    }
+    
+    // Detaylı yol tarifi adımları
+    val navigationSteps = remember {
+        listOf(
+            NavigationStep(
+                step = 1,
+                instruction = "İstanbul merkezinden çıkın",
+                distance = "0 km",
+                duration = "0 dk",
+                turnDirection = "Başlangıç"
+            ),
+            NavigationStep(
+                step = 2,
+                instruction = "D100 karayoluna girin",
+                distance = "5 km",
+                duration = "10 dk",
+                turnDirection = "Sağa dön"
+            ),
+            NavigationStep(
+                step = 3,
+                instruction = "Gebze yönünde devam edin",
+                distance = "25 km",
+                duration = "30 dk",
+                turnDirection = "Düz devam"
+            ),
+            NavigationStep(
+                step = 4,
+                instruction = "İzmit yönünde devam edin",
+                distance = "45 km",
+                duration = "45 dk",
+                turnDirection = "Sola dön"
+            ),
+            NavigationStep(
+                step = 5,
+                instruction = "Sapanca yönünde devam edin",
+                distance = "80 km",
+                duration = "60 dk",
+                turnDirection = "Sağa dön"
+            ),
+            NavigationStep(
+                step = 6,
+                instruction = "Sapanca Gölü'ne ulaşın",
+                distance = "120 km",
+                duration = "120 dk",
+                turnDirection = "Varış"
+            )
         )
     }
     
@@ -74,6 +129,41 @@ fun RouteDetailScreen(
                 }
             }
         )
+        
+        // Navigasyon aktifse üst bilgi paneli
+        if (isNavigationActive) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Navigasyon Aktif",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = navigationSteps[currentStep].instruction,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Mesafe: ${navigationSteps[currentStep].distance}")
+                        Text("Süre: ${navigationSteps[currentStep].duration}")
+                        Text("Adım: ${currentStep + 1}/${navigationSteps.size}")
+                    }
+                }
+            }
+        }
         
         // Harita
         Box(
@@ -173,13 +263,24 @@ fun RouteDetailScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Navigasyon başlat butonu
+                    // Navigasyon başlat/durdur butonu
                     FloatingActionButton(
-                        onClick = { /* Navigasyon başlat */ },
+                        onClick = { 
+                            if (isNavigationActive) {
+                                isNavigationActive = false
+                                currentStep = 0
+                            } else {
+                                isNavigationActive = true
+                                showNavigationDialog = true
+                            }
+                        },
                         modifier = Modifier.size(56.dp),
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = if (isNavigationActive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                     ) {
-                        Icon(Icons.Default.Navigation, "Navigasyon Başlat")
+                        Icon(
+                            if (isNavigationActive) Icons.Default.Stop else Icons.Default.Navigation,
+                            if (isNavigationActive) "Navigasyonu Durdur" else "Navigasyon Başlat"
+                        )
                     }
                     
                     // Konum butonu
@@ -239,29 +340,16 @@ fun RouteDetailScreen(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Yol tarifi
-                Text(
-                    text = "Yol Tarifi",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Text("1. Mevcut konumunuzdan ${route.startLocation} merkezine gidin")
-                Text("2. D100 karayoluna girin")
-                Text("3. ${route.endLocation} yönünde devam edin")
-                Text("4. ${route.endLocation} merkezine ulaşın")
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
                 // Aksiyon butonları
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     OutlinedButton(
-                        onClick = { /* Navigasyon başlat */ }
+                        onClick = { 
+                            isNavigationActive = true
+                            showNavigationDialog = true
+                        }
                     ) {
                         Icon(Icons.Default.Navigation, "Navigasyon")
                         Spacer(modifier = Modifier.width(4.dp))
@@ -279,4 +367,82 @@ fun RouteDetailScreen(
             }
         }
     }
+    
+    // Navigasyon dialog
+    if (showNavigationDialog) {
+        AlertDialog(
+            onDismissRequest = { showNavigationDialog = false },
+            title = { Text("Navigasyon Başlatılıyor") },
+            text = {
+                LazyColumn {
+                    items(navigationSteps) { step ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .background(MaterialTheme.colorScheme.primary),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "${step.step}",
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Column {
+                                    Text(
+                                        text = step.instruction,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "${step.distance} • ${step.duration}",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = step.turnDirection,
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showNavigationDialog = false
+                        isNavigationActive = true
+                        currentStep = 0
+                    }
+                ) {
+                    Text("Navigasyonu Başlat")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNavigationDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
 }
+
+data class NavigationStep(
+    val step: Int,
+    val instruction: String,
+    val distance: String,
+    val duration: String,
+    val turnDirection: String
+)

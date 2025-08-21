@@ -108,7 +108,7 @@ fun ReelsScreen(
             }
         )
         
-        // Reels içeriği
+        // Reels içeriği (Instagram Reels benzeri)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -148,12 +148,41 @@ fun ReelsScreen(
     
     // Yorumlar dialog
     showCommentsDialog?.let { reel ->
+        var newComment by remember { mutableStateOf("") }
+        
         AlertDialog(
             onDismissRequest = { showCommentsDialog = null },
             title = { Text("Yorumlar") },
             text = {
                 Column {
-                    // Örnek yorumlar
+                    // Yeni yorum ekleme
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = newComment,
+                            onValueChange = { newComment = it },
+                            label = { Text("Yorum yazın...") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = {
+                                if (newComment.isNotBlank()) {
+                                    // Yeni yorum ekle
+                                    newComment = ""
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.Send, "Gönder")
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Mevcut yorumlar
                     listOf(
                         "Harika bir paylaşım! 👏",
                         "Bu rotayı ben de gitmek istiyorum 🏍️",
@@ -256,18 +285,18 @@ fun ReelCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(500.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .height(600.dp), // Instagram Reels benzeri yükseklik
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // Gölge yok
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Video/Fotoğraf alanı
+            // Video/Fotoğraf alanı (Instagram Reels benzeri)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .background(Color.Black) // Siyah arka plan
+                    .clip(RoundedCornerShape(0.dp)), // Köşeler yuvarlak değil
                 contentAlignment = Alignment.Center
             ) {
                 // Video placeholder
@@ -277,14 +306,14 @@ fun ReelCard(
                     Icon(
                         Icons.Default.PlayCircleOutline,
                         contentDescription = "Video",
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(80.dp),
                         tint = Color.White
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Video Oynatılıyor",
                         color = Color.White,
-                        fontSize = 16.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
